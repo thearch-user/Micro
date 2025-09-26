@@ -42,4 +42,4 @@ This repository demonstrates a fully integrated communication stack, motor contr
 
 ### Running Simulation on Host
 ```bash
-python fullstack_enterprise_embedded.py
+python main.py
