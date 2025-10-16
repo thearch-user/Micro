@@ -23,13 +23,13 @@ import time
 import sys
 import json
 import gc
-import ubinascii
-import ustruct
+import ubinascii#type:ignore
+import ustruct#type:ignore
 import math
 import hashlib
 import hmac
 try:
-    import machine
+    import machine#type:ignore
 except Exception:
     machine = None
 
@@ -791,6 +791,9 @@ class TelemetryStore:
         return None
     def tail(self, n=10):
         return self.records[-n:]
+    def clear(self):
+        print("Screen Cleared")
+        self.records.clear()
 
 class ESPNode:
     def __init__(self, transport):
@@ -1005,8 +1008,8 @@ class FullSimulation:
             a_stats = self.link.peek_stats()
             if a_stats["a_to_b"] or a_stats["b_to_a"]:
                 log.debug("Link queues a_to_b=%d b_to_a=%d" % (a_stats["a_to_b"], a_stats["b_to_a"]))
-            # ingest any telemetry frames into data recorder
-            lt = self.esp.telemetry.latest()
+            #  any telemetry frames into data recorder
+            lt = self.ingestesp.telemetry.latest()
             if lt:
                 self.datalog.record("telemetry", lt)
             # render dashboard
