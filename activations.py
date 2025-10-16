@@ -15,10 +15,15 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import warnings
+
 warnings.filterwarnings('ignore')
+
 import logging
+
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)
+
+
 def load_data(file_path):
     """Load dataset from a CSV file."""
     try:
@@ -28,6 +33,8 @@ def load_data(file_path):
     except Exception as e:
         logger.error(f"Error loading data: {e}")
         return None
+
+
 def preprocess_data(data):
     """Preprocess the dataset by handling missing values and encoding categorical variables."""
     try:
@@ -40,21 +47,29 @@ def preprocess_data(data):
     except Exception as e:
         logger.error(f"Error in preprocessing data: {e}")
         return None
+
+
 def perform_eda(data):
     """Perform exploratory data analysis."""
-    # try:
+    try:
         # Summary statistics
-    summary = data.describe()
-    logger.info("Summary statistics:\n" + str(summary))
-    # Correlation matrix
-    corr = data.corr()
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm')
-    plt.title("Correlation Matrix")
-    plt.show()
-    logger.info("EDA completed")
-except Exception as e:
+        summary = data.describe()
+        logger.info("Summary statistics:\n" + str(summary))
+
+        # Correlation matrix
+        corr = data.corr()
+        plt.figure(figsize=(10, 8))
+        sns.heatmap(corr, annot=True, fmt=".2f", cmap='coolwarm')
+        plt.title("Correlation Matrix")
+        plt.show()
+
+        logger.info("EDA completed")
+        return {"summary": summary, "corr": corr}
+    except Exception as e:
         logger.error(f"Error in EDA: {e}")
+        return None
+
+
 def reduce_dimensions(data, n_components=2):
     """Reduce dimensions using PCA."""
     try:
@@ -67,6 +82,8 @@ def reduce_dimensions(data, n_components=2):
     except Exception as e:
         logger.error(f"Error in PCA: {e}")
         return None
+
+
 def cluster_data(data, n_clusters=3):
     """Cluster data using KMeans."""
     try:
@@ -78,6 +95,8 @@ def cluster_data(data, n_clusters=3):
     except Exception as e:
         logger.error(f"Error in clustering: {e}")
         return None
+
+
 def classify_data(data, target_column):
     """Classify data using Random Forest."""
     try:
@@ -93,8 +112,12 @@ def classify_data(data, target_column):
         cm = confusion_matrix(y_test, y_pred)
         logger.info("Classification Report:\n" + report)
         logger.info("Confusion Matrix:\n" + str(cm))
+        return {"report": report, "confusion_matrix": cm}
     except Exception as e:
         logger.error(f"Error in classification: {e}")
+        return None
+
+
 def perform_anova(data, dependent_var, independent_var):
     """Perform ANOVA and Tukey's HSD test."""
     try:
@@ -103,6 +126,7 @@ def perform_anova(data, dependent_var, independent_var):
         logger.info("ANOVA Table:\n" + str(anova_table))
         tukey = pairwise_tukeyhsd(endog=data[dependent_var], groups=data[independent_var], alpha=0.05)
         logger.info("Tukey's HSD results:\n" + str(tukey))
+        return {"anova_table": anova_table, "tukey": tukey}
     except Exception as e:
         logger.error(f"Error in ANOVA: {e}")
-        
+        return None 
