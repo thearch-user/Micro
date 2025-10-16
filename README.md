@@ -43,3 +43,8 @@ This repository demonstrates a fully integrated communication stack, motor contr
 ### Running Simulation on Host
 ```bash
 python main.py
+```
+###Index.html in Vscode
+For index.html download the live server extension in VS Code. And run it by right clicking on the file.
+It is basically a thing thats shows performance graphs over the pico and ESP 32. Such as telemetry and
+motor graphs. There is also a google sites website extensively talking about this.
