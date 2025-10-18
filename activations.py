@@ -1,3 +1,4 @@
+import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,7 +19,6 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -90,7 +90,8 @@ def cluster_data(data, n_clusters=3):
         kmeans = KMeans(n_clusters=n_clusters, random_state=42)
         clusters = kmeans.fit_predict(data)
         silhouette_avg = silhouette_score(data, clusters)
-        logger.info(f"KMeans clustering completed with {n_clusters} clusters, Silhouette Score: {silhouette_avg}")
+        logger.info(f"KMeans clustering completed with {
+                    n_clusters} clusters, Silhouette Score: {silhouette_avg}")
         return clusters
     except Exception as e:
         logger.error(f"Error in clustering: {e}")
@@ -102,7 +103,8 @@ def classify_data(data, target_column):
     try:
         X = data.drop(columns=[target_column])
         y = data[target_column]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.3, random_state=42)
         smote = SMOTE(random_state=42)
         X_train_res, y_train_res = smote.fit_resample(X_train, y_train)
         clf = RandomForestClassifier(random_state=42)
@@ -124,9 +126,10 @@ def perform_anova(data, dependent_var, independent_var):
         model = ols(f'{dependent_var} ~ C({independent_var})', data=data).fit()
         anova_table = sm.stats.anova_lm(model, typ=2)
         logger.info("ANOVA Table:\n" + str(anova_table))
-        tukey = pairwise_tukeyhsd(endog=data[dependent_var], groups=data[independent_var], alpha=0.05)
+        tukey = pairwise_tukeyhsd(
+            endog=data[dependent_var], groups=data[independent_var], alpha=0.05)
         logger.info("Tukey's HSD results:\n" + str(tukey))
         return {"anova_table": anova_table, "tukey": tukey}
     except Exception as e:
         logger.error(f"Error in ANOVA: {e}")
-        return None 
+        return None
