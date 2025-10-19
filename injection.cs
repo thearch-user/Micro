@@ -1,4 +1,6 @@
-// Requires: using System.Data; using System.Data.SqlClient; using System.Threading.Tasks;
+using System.Data;
+using System.Data.SqlClient; 
+using System.Threading.Tasks;
 private static async Task UpdateDemographicsAsync(int customerId, string demoXml, string connectionString)
 {
     const string commandText =
@@ -60,9 +62,9 @@ public class UserDto
 }
 
 // Requires:
-// using Microsoft.AspNetCore.Identity;
-// using Microsoft.EntityFrameworkCore;
-// using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 public class UserService
 {

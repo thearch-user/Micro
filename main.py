@@ -681,7 +681,7 @@ class PicoNode:
                 return "ERR SET_SPEED"
             self.motor.enable(); self.motor.set_duty_percent(v); return "ACK SET_SPEED %d" % v
         if cmd == "STATUS":
-            return "STATUS " + sdump({"motor": self.motor.get_state(), "encoder": self.encoder.read()})
+            return "STATUS " + sdump({"motor": self.motor.get_state(), "encoder": self.encoder.read()})a
         if cmd == "PING":
             return "PONG " + config.get("system.pico_id")
         if cmd == "RESET":
