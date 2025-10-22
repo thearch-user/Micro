@@ -23,19 +23,21 @@ import time
 import sys
 import json
 import gc
-import ubinascii#type:ignore
-import ustruct#type:ignore
+import ubinascii  # type:ignore
+import ustruct  # type:ignore
 import math
 import hashlib
 import hmac
 try:
-    import machine#type:ignore
+    import machine  # type:ignore
 except Exception:
     machine = None
 
 # ========================================================================
 # Shared Utilities & Configuration Manager
 # ========================================================================
+
+
 class ConfigManager:
     """
     Simulated configuration manager with persistence interface.
@@ -120,14 +122,20 @@ class ConfigManager:
         cur[parts[-1]] = value
         return True
 
+
 # Instantiate global config for file-scope usage
 config = ConfigManager()
 
 # Logger
+
+
 class Logger:
     LEVELS = {0: "ERROR", 1: "INFO", 2: "DEBUG"}
+
     def __init__(self, level=None):
-        self.level = level if level is not None else config.get("logging.level", 2)
+        self.level = level if level is not None else config.get(
+            "logging.level", 2)
+
     def _emit(self, level, msg):
         if self.level >= level:
             ts = time.ticks_ms() if hasattr(time, "ticks_ms") else int(time.time()*1000)
@@ -137,13 +145,17 @@ class Logger:
                 sys.stdout.write(entry + "\n")
             except Exception:
                 print(entry)
+
     def debug(self, msg): self._emit(2, msg)
     def info(self, msg): self._emit(1, msg)
     def error(self, msg): self._emit(0, msg)
 
+
 log = Logger()
 
 # Basic memory utility
+
+
 class MemoryUtil:
     @staticmethod
     def free():
@@ -153,8 +165,11 @@ class MemoryUtil:
             return -1
 
 # CRC16 - utility for framing
+
+
 class CRC16:
     POLY = 0x1021
+
     @staticmethod
     def compute(data):
         if isinstance(data, str):
@@ -168,11 +183,14 @@ class CRC16:
                 else:
                     crc = (crc << 1) & 0xFFFF
         return crc & 0xFFFF
+
     @staticmethod
     def hexdigest(data):
         return "{0:04X}".format(CRC16.compute(data))
 
 # TLV helper (Type-Length-Value simple binary)
+
+
 class TLV:
     @staticmethod
     def pack(t, v):
@@ -181,6 +199,7 @@ class TLV:
             v = v.encode('utf-8')
         length = len(v)
         return bytes([t]) + ustruct.pack(">H", length) + v
+
     @staticmethod
     def unpack(blob):
         # returns list of (t, v) tuples
@@ -199,6 +218,8 @@ class TLV:
         return out
 
 # HMAC-like auth (uses SHA256 where available)
+
+
 class Auth:
     @staticmethod
     def compute_hmac(key, message):
@@ -210,7 +231,8 @@ class Auth:
             return hmac.new(key, message, hashlib.sha256).hexdigest()
         except Exception:
             # fallback naive hash XOR
-            s = ubinascii.hexlify(hashlib.sha256(message).digest()) if hasattr(hashlib, 'sha256') else ubinascii.hexlify(message)
+            s = ubinascii.hexlify(hashlib.sha256(message).digest()) if hasattr(
+                hashlib, 'sha256') else ubinascii.hexlify(message)
             return s.decode('utf-8')[:64]
 
     @staticmethod
@@ -218,6 +240,8 @@ class Auth:
         return Auth.compute_hmac(key, message) == tag
 
 # JSON safe dump
+
+
 def sdump(obj):
     try:
         return json.dumps(obj)
@@ -230,30 +254,40 @@ def sdump(obj):
 # ========================================================================
 # Transport & Virtual Networking
 # ========================================================================
+
+
 class VirtualLink:
     """
     In-process queue-based transport for connecting two endpoints.
     A simplifies to ESP32 -> Pico, B is Pico -> ESP32
     """
+
     def __init__(self):
         self.queue_a_to_b = []
         self.queue_b_to_a = []
+
     def send_a_to_b(self, data):
         self.queue_a_to_b.append(data)
+
     def send_b_to_a(self, data):
         self.queue_b_to_a.append(data)
+
     def recv_for_a(self):
         if self.queue_b_to_a:
             return self.queue_b_to_a.pop(0)
         return None
+
     def recv_for_b(self):
         if self.queue_a_to_b:
             return self.queue_a_to_b.pop(0)
         return None
+
     def peek_stats(self):
         return {"a_to_b": len(self.queue_a_to_b), "b_to_a": len(self.queue_b_to_a)}
 
 # UART abstraction wrapper - attempts to use machine.UART, else fallbacks to printing
+
+
 class UARTWrapper:
     def __init__(self, uart_id=0, tx=0, rx=1, baud=None, name="UART"):
         self.uart = None
@@ -267,6 +301,7 @@ class UARTWrapper:
                 self.uart = None
         except Exception:
             self.uart = None
+
     def send(self, payload):
         if isinstance(payload, str):
             data = payload + "\n"
@@ -282,6 +317,7 @@ class UARTWrapper:
                 sys.stdout.write("%s TX: %s\n" % (self.name, data))
             except Exception:
                 print("%s TX: %s" % (self.name, data))
+
     def recv(self):
         if self.uart:
             try:
@@ -292,6 +328,8 @@ class UARTWrapper:
         return None
 
 # Frame pack/unpack with TLV option and CRC trailer
+
+
 class FrameProtocol:
     @staticmethod
     def pack_json(obj):
@@ -300,6 +338,7 @@ class FrameProtocol:
         crc = CRC16.compute(payload_bytes)
         frame = b"J" + payload_bytes + b"|" + ("%04X" % crc).encode('utf-8')
         return frame
+
     @staticmethod
     def pack_tlv(tlv_items):
         # tlv_items is list of (t, value)
@@ -310,6 +349,7 @@ class FrameProtocol:
             blob += TLV.pack(t, v)
         crc = CRC16.compute(blob)
         return b"T" + blob + b"|" + ("%04X" % crc).encode('utf-8')
+
     @staticmethod
     def unpack(frame):
         try:
@@ -341,17 +381,23 @@ class FrameProtocol:
 # ========================================================================
 # Data Recorder / Persistent Recorder
 # ========================================================================
+
+
 class DataRecorder:
     def __init__(self, capacity=None):
-        self.capacity = capacity if capacity else config.get("recorder.capacity", 5000)
+        self.capacity = capacity if capacity else config.get(
+            "recorder.capacity", 5000)
         self.records = []
+
     def record(self, key, payload):
         entry = {"ts": time.ticks_ms(), "key": key, "payload": payload}
         self.records.append(entry)
         if len(self.records) > self.capacity:
             self.records.pop(0)
+
     def query_last(self, count=10):
         return self.records[-count:]
+
     def dump(self, limit=50):
         out = self.records[-limit:]
         try:
@@ -364,6 +410,8 @@ class DataRecorder:
 # ========================================================================
 # Motor Subsystem (Pico)
 # ========================================================================
+
+
 class MotorDriver:
     def __init__(self, pwm_pin=None, dir_pin=None):
         if pwm_pin is None:
@@ -384,15 +432,18 @@ class MotorDriver:
             except Exception:
                 self._pwm = None
                 self._dir_hw = None
+
     def enable(self):
         self._enabled = True
         self._apply()
         log.info("MotorDriver: enabled")
+
     def disable(self):
         self._enabled = False
         self._duty = 0
         self._apply()
         log.info("MotorDriver: disabled")
+
     def set_direction(self, direction):
         self._direction = 1 if direction >= 0 else -1
         if self._dir_hw:
@@ -400,7 +451,9 @@ class MotorDriver:
                 self._dir_hw.value(1 if self._direction > 0 else 0)
             except Exception:
                 pass
-        log.debug("MotorDriver: set direction %s" % ("forward" if self._direction>0 else "reverse"))
+        log.debug("MotorDriver: set direction %s" %
+                  ("forward" if self._direction > 0 else "reverse"))
+
     def set_duty_percent(self, percent):
         if percent < 0:
             self.set_direction(-1)
@@ -412,6 +465,7 @@ class MotorDriver:
         self._duty = int(percent)
         self._apply()
         log.debug("MotorDriver: duty set to %d%%" % self._duty)
+
     def _apply(self):
         if not self._pwm or not self._enabled:
             if self._pwm:
@@ -428,14 +482,18 @@ class MotorDriver:
                 self._pwm.duty(int(self._duty * 1023 / 100))
             except Exception:
                 pass
+
     def stop(self):
         self._duty = 0
         self._apply()
         log.info("MotorDriver: stop called")
+
     def get_state(self):
         return {"enabled": self._enabled, "duty_percent": self._duty, "direction": self._direction}
 
 # Encoder
+
+
 class Encoder:
     def __init__(self, pin_a=None, pin_b=None):
         if pin_a is None:
@@ -450,11 +508,14 @@ class Encoder:
             try:
                 pa = machine.Pin(self.pin_a, machine.Pin.IN)
                 pb = machine.Pin(self.pin_b, machine.Pin.IN)
-                pa.irq(trigger=machine.Pin.IRQ_RISING|machine.Pin.IRQ_FALLING, handler=self._handler)
-                pb.irq(trigger=machine.Pin.IRQ_RISING|machine.Pin.IRQ_FALLING, handler=self._handler)
+                pa.irq(trigger=machine.Pin.IRQ_RISING |
+                       machine.Pin.IRQ_FALLING, handler=self._handler)
+                pb.irq(trigger=machine.Pin.IRQ_RISING |
+                       machine.Pin.IRQ_FALLING, handler=self._handler)
                 self._irq_installed = True
             except Exception:
                 self._irq_installed = False
+
     def _handler(self, pin):
         # naive quadrature handler
         try:
@@ -462,21 +523,28 @@ class Encoder:
             b = machine.Pin(self.pin_b).value()
             if a == b:
                 self._count += 1
-            else:--
+            else:
+                --
                 self._count -= 1
         except Exception:
             self._count += 1
+
     def read(self):
         return self._count
+
     def reset(self):
         self._count = 0
+
     def simulate(self, steps=1):
         self._count += int(steps)
 
 # PID controller
+
+
 class PIDController:
     def __init__(self, kp=None, ki=None, kd=None, dt=0.05, out_min=-100, out_max=100):
-        kp, ki, kd = kp if kp is not None else config.get("motor.default_pid", [0.8, 0.05, 0.01])
+        kp, ki, kd = kp if kp is not None else config.get(
+            "motor.default_pid", [0.8, 0.05, 0.01])
         self.kp = float(kp)
         self.ki = float(ki)
         self.kd = float(kd)
@@ -485,14 +553,17 @@ class PIDController:
         self.out_max = out_max
         self._integral = 0.0
         self._prev_err = 0.0
+
     def reset(self):
         self._integral = 0.0
         self._prev_err = 0.0
+
     def compute(self, setpoint, measurement):
         err = setpoint - measurement
         self._integral += err * self.dt
         derivative = (err - self._prev_err)/self.dt if self.dt else 0.0
-        out = (self.kp * err) + (self.ki * self._integral) + (self.kd * derivative)
+        out = (self.kp * err) + (self.ki * self._integral) + \
+            (self.kd * derivative)
         self._prev_err = err
         if out > self.out_max:
             out = self.out_max
@@ -501,8 +572,12 @@ class PIDController:
         return out
 
 # Command Parser
+
+
 class CommandParser:
-    ALLOWED = {"FORWARD", "REVERSE", "STOP", "SET_SPEED", "STATUS", "PING", "RESET", "SET_PID", "AUTH", "DUMP"}
+    ALLOWED = {"FORWARD", "REVERSE", "STOP", "SET_SPEED",
+               "STATUS", "PING", "RESET", "SET_PID", "AUTH", "DUMP"}
+
     def parse(self, raw):
         if not raw:
             return None
@@ -532,13 +607,17 @@ class CommandParser:
             return {"cmd": "PARSE_ERROR", "raw": str(raw)}
 
 # Telemetry builder
+
+
 class TelemetryBuilder:
     def __init__(self, motor, encoder):
         self.motor = motor
         self.encoder = encoder
         self._last = time.ticks_ms()
+
     def due(self):
         return time.ticks_diff(time.ticks_ms(), self._last) >= config.get("comm.telemetry_ms", 2000)
+
     def build(self):
         pkt = {
             "id": config.get("system.pico_id"),
@@ -549,10 +628,13 @@ class TelemetryBuilder:
             "mem_free": MemoryUtil.free()
         }
         return "TELEM " + sdump(pkt)
+
     def mark_sent(self):
         self._last = time.ticks_ms()
 
 # Watchdog / soft
+
+
 class Watchdog:
     def __init__(self, timeout_ms=None):
         if timeout_ms is None:
@@ -560,24 +642,31 @@ class Watchdog:
         self.timeout = timeout_ms
         self._last = time.ticks_ms()
         self._armed = True
+
     def kick(self):
         self._last = time.ticks_ms()
+
     def check(self):
         if not self._armed:
             return True
         return time.ticks_diff(time.ticks_ms(), self._last) <= self.timeout
+
     def arm(self):
         self._armed = True
         self.kick()
+
     def disarm(self):
         self._armed = False
 
 # Diagnostics
+
+
 class Diagnostics:
     def __init__(self, motor, encoder):
         self.motor = motor
         self.encoder = encoder
         self._last = time.ticks_ms()
+
     def run(self):
         now = time.ticks_ms()
         if time.ticks_diff(now, self._last) < 1000:
@@ -589,9 +678,12 @@ class Diagnostics:
             log.error("Diagnostics: motor enabled but duty_percent==0")
         if enc < 0:
             log.error("Diagnostics: encoder negative")
-        log.debug("Diagnostics snapshot duty=%d enc=%d mem=%d" % (st["duty_percent"], enc, MemoryUtil.free()))
+        log.debug("Diagnostics snapshot duty=%d enc=%d mem=%d" %
+                  (st["duty_percent"], enc, MemoryUtil.free()))
 
 # Pico Application
+
+
 class PicoNode:
     def __init__(self, transport):
         self.transport = transport
@@ -608,11 +700,13 @@ class PicoNode:
         self._running = False
         self._auth_ok = False
         self._auth_token = None
+
     def receive(self):
         if isinstance(self.transport, VirtualLink):
             raw = self.transport.recv_for_b()
             if raw:
-                payload, err = FrameProtocol.unpack(raw if isinstance(raw, bytes) else raw.encode('utf-8'))
+                payload, err = FrameProtocol.unpack(
+                    raw if isinstance(raw, bytes) else raw.encode('utf-8'))
                 if err:
                     log.error("PicoNode: frame unpack error %s" % err)
                     return None
@@ -632,16 +726,20 @@ class PicoNode:
                 except Exception:
                     return raw
         return None
+
     def send(self, text):
-        frame = FrameProtocol.pack_json(text if isinstance(text, dict) else text)
+        frame = FrameProtocol.pack_json(
+            text if isinstance(text, dict) else text)
         if isinstance(self.transport, VirtualLink):
             self.transport.send_b_to_a(frame)
         elif isinstance(self.transport, UARTWrapper):
             self.transport.send(text)
+
     def enqueue(self, raw):
         obj = self.parser.parse(raw)
         if obj:
             self._cmd_queue.append(obj)
+
     def process_queue(self):
         if not self._cmd_queue:
             return
@@ -649,6 +747,7 @@ class PicoNode:
         resp = self.execute(cmd_obj)
         if resp:
             self.send(resp)
+
     def execute(self, obj):
         if not obj:
             return None
@@ -669,34 +768,49 @@ class PicoNode:
             # require auth for politeness in demo
             return "ERR UNAUTH"
         if cmd == "FORWARD":
-            self.motor.enable(); self.motor.set_duty_percent(50); return "ACK FORWARD"
+            self.motor.enable()
+            self.motor.set_duty_percent(50)
+            return "ACK FORWARD"
         if cmd == "REVERSE":
-            self.motor.enable(); self.motor.set_duty_percent(-50); return "ACK REVERSE"
+            self.motor.enable()
+            self.motor.set_duty_percent(-50)
+            return "ACK REVERSE"
         if cmd == "STOP":
-            self.motor.stop(); return "ACK STOP"
+            self.motor.stop()
+            return "ACK STOP"
         if cmd == "SET_SPEED":
             try:
-                v = int(args[0]) if isinstance(args, list) and args else int(args)
+                v = int(args[0]) if isinstance(
+                    args, list) and args else int(args)
             except Exception:
                 return "ERR SET_SPEED"
-            self.motor.enable(); self.motor.set_duty_percent(v); return "ACK SET_SPEED %d" % v
+            self.motor.enable()
+            self.motor.set_duty_percent(v)
+            return "ACK SET_SPEED %d" % v
         if cmd == "STATUS":
             return "STATUS " + sdump({"motor": self.motor.get_state(), "encoder": self.encoder.read()})a
         if cmd == "PING":
             return "PONG " + config.get("system.pico_id")
         if cmd == "RESET":
-            self.motor.stop(); self.pid.reset(); self.encoder.reset(); return "ACK RESET"
+            self.motor.stop()
+            self.pid.reset()
+            self.encoder.reset()
+            return "ACK RESET"
         if cmd == "SET_PID":
             try:
-                kp = float(args[0]); ki = float(args[1]); kd = float(args[2])
+                kp = float(args[0])
+                ki = float(args[1])
+                kd = float(args[2])
                 self.pid.kp, self.pid.ki, self.pid.kd = kp, ki, kd
-                self.pid.reset(); return "ACK SET_PID"
+                self.pid.reset()
+                return "ACK SET_PID"
             except Exception:
                 return "ERR SET_PID"
         if cmd == "DUMP":
             # return a dump of recorder tail
             return "DUMP " + sdump(self.recorder.query_last(10))
         return "ERR UNKNOWN"
+
     def poll(self):
         # receive frames
         incoming = self.receive()
@@ -732,11 +846,16 @@ class PicoNode:
 # ========================================================================
 # ESP32 Controller Node
 # ========================================================================
+
+
 class Scheduler:
     def __init__(self):
         self.tasks = []
+
     def add(self, fn, interval_ms):
-        self.tasks.append({"fn": fn, "interval": interval_ms, "last": time.ticks_ms()})
+        self.tasks.append(
+            {"fn": fn, "interval": interval_ms, "last": time.ticks_ms()})
+
     def run_pending(self):
         now = time.ticks_ms()
         for t in self.tasks:
@@ -747,16 +866,19 @@ class Scheduler:
                     log.error("Scheduler task failed: %s" % str(e))
                 t["last"] = now
 
+
 class CommandSequence:
     def __init__(self):
         self.seq = []
         self.index = 0
         self.last_ts = time.ticks_ms()
+
     def load(self, seq):
         # seq: list of tuples (delay_ms, cmd) - delay is relative to last issue
         self.seq = seq
         self.index = 0
         self.last_ts = time.ticks_ms()
+
     def due(self):
         if self.index >= len(self.seq):
             return None
@@ -767,13 +889,16 @@ class CommandSequence:
             self.index += 1
             return cmd
         return None
+
     def reset(self):
         self.index = 0
         self.last_ts = time.ticks_ms()
 
+
 class TelemetryStore:
     def __init__(self):
         self.records = []
+
     def ingest(self, pkt):
         try:
             # accept raw JSON or dict
@@ -785,15 +910,19 @@ class TelemetryStore:
             self.records.append(obj)
         except Exception:
             self.records.append({"raw": pkt, "_recv_ts": time.ticks_ms()})
+
     def latest(self):
         if self.records:
             return self.records[-1]
         return None
+
     def tail(self, n=10):
         return self.records[-n:]
+
     def clear(self):
         print("Screen Cleared")
         self.records.clear()
+
 
 class ESPNode:
     def __init__(self, transport):
@@ -821,6 +950,7 @@ class ESPNode:
         self.cmd_seq.load(default_seq)
         # HMAC key for auth
         self.hmac_key = config.get("security.hmac_key", "default_hmac_key")
+
     def send(self, text):
         # text may be string or dict
         payload = text if isinstance(text, str) else sdump(text)
@@ -829,11 +959,13 @@ class ESPNode:
             self.transport.send_a_to_b(frame)
         elif isinstance(self.transport, UARTWrapper):
             self.transport.send(payload)
+
     def receive(self):
         if isinstance(self.transport, VirtualLink):
             raw = self.transport.recv_for_a()
             if raw:
-                payload, err = FrameProtocol.unpack(raw if isinstance(raw, bytes) else raw.encode('utf-8'))
+                payload, err = FrameProtocol.unpack(
+                    raw if isinstance(raw, bytes) else raw.encode('utf-8'))
                 if err:
                     log.error("ESPNode: frame unpack err %s" % err)
                     return None
@@ -852,6 +984,7 @@ class ESPNode:
                 except Exception:
                     return raw
         return None
+
     def ingest(self, line):
         if not line:
             return
@@ -874,13 +1007,15 @@ class ESPNode:
                 log.info("ESPNode: STATUS %s" % line[len("STATUS "):])
             else:
                 log.debug("ESPNode: incoming %s" % str(line)[:120])
+
     def issue_auth(self):
         # build an AUTH command with HMAC over a small payload
         token_seed = config.get("security.token_seed", "seed")
-        payload = sdump({"cmd":"AUTH", "args": {"ts": time.ticks_ms()}})
+        payload = sdump({"cmd": "AUTH", "args": {"ts": time.ticks_ms()}})
         tag = self._security.compute_hmac(self.hmac_key, payload)
-        cmd = {"cmd":"AUTH", "args": {"ts": time.ticks_ms()}, "token": tag}
+        cmd = {"cmd": "AUTH", "args": {"ts": time.ticks_ms()}, "token": tag}
         self.send(cmd)
+
     def tick(self):
         # called by scheduler
         # process incoming
@@ -907,11 +1042,14 @@ class ESPNode:
 # ========================================================================
 # Web Dashboard Simulator (Text-mode)
 # ========================================================================
+
+
 class WebDashboard:
     def __init__(self, espnode):
         self.esp = espnode
         self._last_render = 0
         self._update_ms = 1500
+
     def render(self):
         if time.ticks_diff(time.ticks_ms(), self._last_render) < self._update_ms:
             return
@@ -919,13 +1057,16 @@ class WebDashboard:
         latest = self.esp.telemetry.latest()
         try:
             sys.stdout.write("\n--- Web Dashboard Snapshot ---\n")
-            sys.stdout.write("ESP ID: %s FW: %s\n" % (config.get("system.esp_id"), config.get("system.fw_version")))
+            sys.stdout.write("ESP ID: %s FW: %s\n" % (config.get(
+                "system.esp_id"), config.get("system.fw_version")))
             if latest:
-                sys.stdout.write("Latest Telemetry ID: %s  MemFree: %s\n" % (latest.get("id"), latest.get("mem_free")))
+                sys.stdout.write("Latest Telemetry ID: %s  MemFree: %s\n" % (
+                    latest.get("id"), latest.get("mem_free")))
                 sys.stdout.write("Latest Payload: %s\n" % sdump(latest)[:400])
             else:
                 sys.stdout.write("No telemetry received yet.\n")
-            sys.stdout.write("Telemetry store size: %d\n" % len(self.esp.telemetry.records))
+            sys.stdout.write("Telemetry store size: %d\n" %
+                             len(self.esp.telemetry.records))
             sys.stdout.write("-------------------------------\n")
         except Exception:
             print("Dashboard render error")
@@ -933,10 +1074,13 @@ class WebDashboard:
 # ========================================================================
 # CLI Utility (Interactive-like simulation)
 # ========================================================================
+
+
 class CLI:
     def __init__(self, espnode, piconode):
         self.esp = espnode
         self.pico = piconode
+
     def run_command(self, cmd):
         # allows injecting commands into the system external to sequence
         try:
@@ -963,6 +1107,8 @@ class CLI:
 # ========================================================================
 # Simulation Harness (full-stack run)
 # ========================================================================
+
+
 class FullSimulation:
     def __init__(self, duration_ms=120000, tick_ms=50):
         self.duration = duration_ms
@@ -975,6 +1121,7 @@ class FullSimulation:
         self.cli = CLI(self.esp, self.pico)
         self._running = False
         self._start_ts = None
+
     def warm_start(self):
         # initial handshake: ESP sends AUTH to Pico
         self.esp.issue_auth()
@@ -984,11 +1131,14 @@ class FullSimulation:
         for _ in range(3):
             self.pico.poll()
             self.esp.tick()
+
     def run(self):
         self._running = True
         self._start_ts = time.ticks_ms()
-        end_cond = lambda: time.ticks_diff(time.ticks_ms(), self._start_ts) >= self.duration
-        log.info("FullSimulation: starting duration_ms=%d tick_ms=%d" % (self.duration, self.tick))
+        def end_cond(): return time.ticks_diff(
+            time.ticks_ms(), self._start_ts) >= self.duration
+        log.info("FullSimulation: starting duration_ms=%d tick_ms=%d" %
+                 (self.duration, self.tick))
         # warm start that issues tokens, etc.
         self.warm_start()
         # main loop
@@ -1007,7 +1157,8 @@ class FullSimulation:
             # sample logging
             a_stats = self.link.peek_stats()
             if a_stats["a_to_b"] or a_stats["b_to_a"]:
-                log.debug("Link queues a_to_b=%d b_to_a=%d" % (a_stats["a_to_b"], a_stats["b_to_a"]))
+                log.debug("Link queues a_to_b=%d b_to_a=%d" %
+                          (a_stats["a_to_b"], a_stats["b_to_a"]))
             #  any telemetry frames into data recorder
             lt = self.ingestesp.telemetry.latest()
             if lt:
@@ -1031,6 +1182,8 @@ class FullSimulation:
 # ========================================================================
 # Self-test & unit checks
 # ========================================================================
+
+
 def unit_tests():
     log.info("Running unit tests")
     # Config tests
@@ -1042,13 +1195,14 @@ def unit_tests():
     parsed = TLV.unpack(blob)
     assert parsed[0][0] == 1 and parsed[0][1] == b"abc"
     # Frame pack/unpack JSON
-    frame = FrameProtocol.pack_json({"cmd":"PING"})
+    frame = FrameProtocol.pack_json({"cmd": "PING"})
     payload, err = FrameProtocol.unpack(frame)
     assert err is None
     # Auth HMAC compute
     tag = Auth.compute_hmac("key", "msg")
     assert isinstance(tag, str)
     log.info("Unit tests complete")
+
 
 # ========================================================================
 # Entrypoint
