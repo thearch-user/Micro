@@ -462,7 +462,7 @@ class Encoder:
             b = machine.Pin(self.pin_b).value()
             if a == b:
                 self._count += 1
-            else:
+            else:--
                 self._count -= 1
         except Exception:
             self._count += 1
