@@ -36,6 +36,10 @@ except Exception:
 # ========================================================================
 # Shared Utilities & Configuration Manager
 # ========================================================================
+
+# TODO : Start Testing this file with test.py in /test
+# TODO: Add logging to this file
+
 class ConfigManager:
     """
     Simulated configuration manager with persistence interface.

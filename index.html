@@ -684,8 +684,11 @@ function openNewRecord(){
   modal.querySelector('#createRecBtn').addEventListener('click', ()=>{
     const rec = {id: uid('rec'), title: document.getElementById('newTitle').value || 'New Task', owner: document.getElementById('newOwner').value||'ops.unknown', priority: document.getElementById('newPriority').value||'P3', created: new Date().toLocaleDateString(), lastUpdate: new Date().toLocaleDateString(), notes: document.getElementById('newNotes').value};
     console.log("Tests Passed successfully");
-    
-    appState.dbColumns[0].items = appState.dbColumns[0].Array.isArray(appState.dbColumns[0].items) ? appState.dbColumns[0].items : []; //ensure array                 
+    console.log("Starting to execute AP Tests")
+
+    // TODO: Implement validation Admin Progress and Engineer role handling with a successful ID Manager
+
+    appState.dbColumns[0].items = Array.isArray(appState.dbColumns[0].items) ? appState.dbColumns[0].items : []; //ensure array
     appState.dbColumns[0].items.unshift(rec); // add to Backlog
     modal.remove(); document.getElementById('modalContainer').style.display='none';
     if(document.querySelector('.sidebar button.active').dataset.view === 'databases') renderDatabases();
