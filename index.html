@@ -727,6 +727,7 @@ function showLogin(){
   document.getElementById('modalContainer').appendChild(modal);
   document.getElementById('modalContainer').style.display='block';
   modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
+  mod
   modal.querySelector('#signInBtn').addEventListener('click', ()=>{
     const role = document.getElementById('roleSelect').value;
     setRole(role);
