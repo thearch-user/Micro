@@ -164,6 +164,7 @@
       <button id="themeToggle" class="icon-btn" title="Toggle Theme">Dark</button>
       <button id="loginBtn" class="icon-btn">Sign In</button>
       <button id="exportCsv" class="icon-btn">Export</button>
+      <button id="adminManagerBtn" class="icon-btn" style="display:none">Admin Manager</button>
       <button id="createCard" class="btn" style="display:none">New Record</button>
     </div>
   </div>
@@ -687,6 +688,7 @@ function openNewRecord(){
     console.log("Starting to execute AP Tests")
 
     // TODO: Implement validation Admin Progress and Engineer role handling with a successful ID Manager
+    //TODO: Implement a role called Founder that manages the permissions of admin and decides admins and gets to control a few extra features
 
     appState.dbColumns[0].items = Array.isArray(appState.dbColumns[0].items) ? appState.dbColumns[0].items : []; //ensure array
     appState.dbColumns[0].items.unshift(rec); // add to Backlog
@@ -720,6 +722,7 @@ function showLogin(){
         <option value="Viewer">Viewer</option>
         <option value="Engineer">Engineer</option>
         <option value="Admin">Admin</option>
+        <option value="Founder">Founder</option>
       </select>
     </div>
     <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
@@ -730,13 +733,69 @@ function showLogin(){
   document.getElementById('modalContainer').appendChild(modal);
   document.getElementById('modalContainer').style.display='block';
   modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
-  mod
   modal.querySelector('#signInBtn').addEventListener('click', ()=>{
     const role = document.getElementById('roleSelect').value;
+    const username = (document.getElementById('userName').value || '').trim() || ('user_' + Math.floor(Math.random()*9000+1000));
+    // persist user to simple user store
+    upsertUser(username, role);
     setRole(role);
+    // set the current user name in UI for clarity
+    document.getElementById('sessionRole').innerText = role || 'Viewer';
+    // optionally update login button label to user
+    document.getElementById('loginBtn').innerText = username;
     modal.remove(); document.getElementById('modalContainer').style.display='none';
     // immediate re-render to reflect permissions
     routeToCurrent();
+  });
+}
+
+/* ================ Simple user store & Admin Manager (Founder) ================ */
+function loadUsers(){
+  try{ return JSON.parse(localStorage.getItem('micro_users')||'[]'); }catch(e){ return []; }
+}
+function saveUsers(list){ localStorage.setItem('micro_users', JSON.stringify(list||[])); }
+function upsertUser(username, role){
+  const users = loadUsers();
+  const idx = users.findIndex(u=>u.username === username);
+  if(idx > -1) users[idx].role = role;
+  else users.push({username, role});
+  saveUsers(users);
+  appState.currentUser = username;
+}
+
+function showAdminManager(){
+  const users = loadUsers();
+  const modal = document.createElement('div'); modal.className='modal-backdrop';
+  modal.innerHTML = `<div class="modal">
+    <h2>Admin Manager</h2>
+    <div id="adminList" style="max-height:320px;overflow:auto;margin-top:8px"></div>
+    <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+      <button class="icon-btn">Close</button>
+      <button class="btn" id="adminSave">Save</button>
+    </div>
+  </div>`;
+  document.getElementById('modalContainer').appendChild(modal);
+  document.getElementById('modalContainer').style.display='block';
+
+  const listEl = modal.querySelector('#adminList');
+  if(users.length === 0) listEl.innerHTML = '<div class="muted small">No known users yet. Users are added when they sign in.</div>';
+  else{
+    listEl.innerHTML = users.map(u=>`<div style="display:flex;gap:8px;align-items:center;padding:6px;border-bottom:1px solid rgba(0,0,0,0.04)"><div style="flex:1">${u.username}</div><select data-user="${u.username}" style="width:160px"><option>Viewer</option><option>Engineer</option><option>Admin</option><option>Founder</option></select></div>`).join('');
+    // set current selections
+    users.forEach(u=>{ const sel = listEl.querySelector(`select[data-user="${u.username}"]`); if(sel) sel.value = u.role; });
+  }
+
+  modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
+  modal.querySelector('#adminSave').addEventListener('click', ()=>{
+    const selects = listEl.querySelectorAll('select[data-user]');
+    const updated = [];
+    selects.forEach(s=>{ updated.push({username: s.getAttribute('data-user'), role: s.value}); });
+    saveUsers(updated);
+    // if current user role changed, reflect it
+    const cur = appState.currentUser;
+    if(cur){ const me = updated.find(u=>u.username===cur); if(me) setRole(me.role); }
+    modal.remove(); document.getElementById('modalContainer').style.display='none';
+    alert('User roles updated');
   });
 }
 
