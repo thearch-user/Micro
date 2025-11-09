@@ -1,4 +1,5 @@
-# Micro-Analytics
+nal
+m Micro-Analytics
 
 Micro-Analytics is a full-stack, enterprise-grade firmware and tooling platform for a dual-node embedded system, featuring an ESP32 controller and a Raspberry Pi Pico motor node. This repository showcases a complete, integrated solution, from low-level motor control to a sophisticated web-based management suite.
 
