@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Micro — System Management Suite</title>
@@ -146,8 +149,10 @@
   </nav>
 
   <div class="meta">
+
     <div class="small muted">Session:</div>
     <div style="margin-top:6px"><span id="sessionRole" class="chip">Viewer</span></div>
+
     <div style="margin-top:12px" class="small muted">Nodes</div>
     <div style="margin-top:6px"><div class="small">PICO-MTR-01 • ESP32-CMD-01</div></div>
   </div>
@@ -158,7 +163,9 @@
   <div class="topbar">
     <div class="left">
       <input id="globalSearch" class="search" placeholder="Search telemetry, logs, devices, configs..." />
+
     </div>
+
 
     <div class="controls">
       <button id="themeToggle" class="icon-btn" title="Toggle Theme">Dark</button>
@@ -345,6 +352,7 @@ function renderOverview(){
             <thead><tr><th>Indicator</th><th>Value</th><th>Threshold</th></tr></thead>
             <tbody>
               <tr><td>Avg Latency</td><td>3.4 ms</td><td>&lt;10 ms</td></tr>
+
               <tr><td>Error Rate</td><td>0.05%</td><td>&lt;0.5%</td></tr>
               <tr><td>Watchdog Events</td><td>1</td><td>0</td></tr>
               <tr><td>Security Events</td><td>0</td><td>0</td></tr>
@@ -397,7 +405,9 @@ function renderTelemetry(){
   function refresh(filter=''){
     tbody.innerHTML = '';
     const rows = appState.telemetry.filter(r => {
+
       if(!filter) return true;
+
       const s = (r.node + ' ' + r.msg + ' ' + r.crc).toLowerCase();
       return s.includes(filter.toLowerCase());
     });
@@ -436,11 +446,13 @@ function renderMotor(){
       <div style="margin-top:10px; display:flex; gap:8px">
         <button class="btn" onclick="alert('Start command issued')">Start</button>
         <button class="btn" onclick="alert('Stop command issued')">Stop</button>
+
         <button class="btn" onclick="alert('Reverse command issued')">Reverse</button>
       </div>
     </div>
 
     <div class="panel" style="margin-top:12px">
+
       <h3>Control Loop Diagnostics</h3>
       <table class="table">
         <thead><tr><th>Metric</th><th>Value</th><th>Tolerance</th></tr></thead>
@@ -504,6 +516,7 @@ function renderDatabases(){
   content.innerHTML = `
     <div class="panel">
       <h3>Databases — Project Board</h3>
+
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
         <input id="dbSearch" class="input" placeholder="Search records, owners, priorities..." style="padding:8px;border-radius:8px;flex:1"/>
         <button class="btn" id="addRecordBtn">New Record</button>
@@ -632,7 +645,9 @@ function renderSettings(){
 
   document.getElementById('applySettings').addEventListener('click', ()=>{
     alert('Settings applied and persisted');
+
     // basic local persistence
+
     const cfg = {kp:document.getElementById('kp').value, ki:document.getElementById('ki').value, kd:document.getElementById('kd').value, baud:document.getElementById('baud').value, hb:document.getElementById('hb').value};
     localStorage.setItem('micro_config', JSON.stringify(cfg));
   });
@@ -675,6 +690,7 @@ function openNewRecord(){
     <div class="form-row"><input class="input" id="newOwner" placeholder="Owner (e.g. eng.alex)" /><input class="input" id="newPriority" placeholder="Priority (P1/P2)" /></div>
     <div><label class="small muted">Notes</label><textarea id="newNotes" style="width:100%;height:80px;border-radius:8px;padding:8px"></textarea></div>
     <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
+
       <button class="icon-btn">Cancel</button>
       <button class="btn" id="createRecBtn">Create</button>
     </div>
@@ -682,10 +698,12 @@ function openNewRecord(){
   document.getElementById('modalContainer').appendChild(modal);
   document.getElementById('modalContainer').style.display='block';
   modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
+
   modal.querySelector('#createRecBtn').addEventListener('click', ()=>{
     const rec = {id: uid('rec'), title: document.getElementById('newTitle').value || 'New Task', owner: document.getElementById('newOwner').value||'ops.unknown', priority: document.getElementById('newPriority').value||'P3', created: new Date().toLocaleDateString(), lastUpdate: new Date().toLocaleDateString(), notes: document.getElementById('newNotes').value};
     console.log("Tests Passed successfully");
     console.log("Starting to execute AP Tests")
+
 
     // TODO: Implement validation Admin Progress and Engineer role handling with a successful ID Manager
     //TODO: Implement a role called Founder that manages the permissions of admin and decides admins and gets to control a few extra features
@@ -709,6 +727,7 @@ function exportBoardCSV(){
   const blob = new Blob([csv], {type:'text/csv'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a'); a.href=url; a.download='micro_board_export.csv'; a.click(); URL.revokeObjectURL(url);
+
 }
 
 /* ==================== Auth / Login modal ================== */
@@ -781,6 +800,7 @@ function showAdminManager(){
   if(users.length === 0) listEl.innerHTML = '<div class="muted small">No known users yet. Users are added when they sign in.</div>';
   else{
     listEl.innerHTML = users.map(u=>`<div style="display:flex;gap:8px;align-items:center;padding:6px;border-bottom:1px solid rgba(0,0,0,0.04)"><div style="flex:1">${u.username}</div><select data-user="${u.username}" style="width:160px"><option>Viewer</option><option>Engineer</option><option>Admin</option><option>Founder</option></select></div>`).join('');
+
     // set current selections
     users.forEach(u=>{ const sel = listEl.querySelector(`select[data-user="${u.username}"]`); if(sel) sel.value = u.role; });
   }
@@ -861,5 +881,7 @@ routeToCurrent();
 document.getElementById('createCard').style.display = (appState.role==='Admin' || appState.role==='Engineer') ? 'inline-block' : 'none';
 
 </script>
+
 </body>
+
 </html>
