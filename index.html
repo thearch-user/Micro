@@ -4,287 +4,543 @@
 
 <head>
 
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Micro — System Management Suite</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Micro — System Management Suite</title>
 
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-  :root{
-    --bg: #eef1f5;
-    --panel: #ffffff;
-    --muted: #6b7280;
-    --accent: #2563eb;
-    --accent-2: #0891b2;
-    --danger: #ef4444;
-    --success: #10b981;
-    --shadow: 0 6px 20px rgba(16,24,40,0.08);
-    --glass: rgba(255,255,255,0.65);
-  }
-  [data-theme="dark"]{
-    --bg:#0b1020;
-    --panel:#0f1724;
-    --muted:#9ca3af;
-    --accent:#4f46e5;
-    --accent-2:#06b6d4;
-    --danger:#f87171;
-    --success:#34d399;
-    --shadow: 0 8px 30px rgba(2,6,23,0.6);
-    --glass: rgba(255,255,255,0.03);
-  }
+  <style>
+    :root {
+      --bg: #eef1f5;
+      --panel: #ffffff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #0891b2;
+      --danger: #ef4444;
+      --success: #10b981;
+      --shadow: 0 6px 20px rgba(16, 24, 40, 0.08);
+      --glass: rgba(255, 255, 255, 0.65);
+    }
 
-  *{box-sizing:border-box}
-  body{
-    margin:0;font-family:Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
-    background:var(--bg); color: #e6eef8; min-height:100vh; display:flex; height:100vh;
-  }
+    [data-theme="dark"] {
+      --bg: #0b1020;
+      --panel: #0f1724;
+      --muted: #9ca3af;
+      --accent: #4f46e5;
+      --accent-2: #06b6d4;
+      --danger: #f87171;
+      --success: #34d399;
+      --shadow: 0 8px 30px rgba(2, 6, 23, 0.6);
+      --glass: rgba(255, 255, 255, 0.03);
+    }
 
-  /* Sidebar */
-  .sidebar{
-    width:280px; background:linear-gradient(180deg,#0f1724 0%, #0b1220 100%); color:#e6eef8;
-    display:flex; flex-direction:column; padding:20px; gap:12px; box-shadow: var(--shadow);
-  }
-  .brand{font-size:20px; font-weight:700; display:flex; gap:10px; align-items:center}
-  .brand .logo{
-    width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;
-  }
-  .nav{margin-top:10px; display:flex; flex-direction:column; gap:6px;}
-  .nav button{
-    border:0;background:transparent;color:var(--muted);text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:600;
-  }
-  .nav button.active{background:rgba(255,255,255,0.04); color:#fff; box-shadow: inset 0 1px rgba(255,255,255,0.02)}
-  .sidebar .meta {margin-top:auto; font-size:13px; color:var(--muted);}
+    * {
+      box-sizing: border-box
+    }
 
-  /* Main content */
-  .main{flex:1; display:flex; flex-direction:column; min-width:0}
-  .topbar{
-    height:72px; display:flex; align-items:center; justify-content:space-between; padding:12px 22px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)); box-shadow: var(--shadow);
-  }
-  .topbar .left{display:flex; gap:18px; align-items:center}
-  .search{width:340px;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:var(--glass); color:#fff}
-  .controls{display:flex; gap:12px; align-items:center}
-  .btn{
-    padding:8px 12px;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;font-weight:700;cursor:pointer;
-  }
-  .icon-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:var(--muted);cursor:pointer}
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+      background: var(--bg);
+      color: #e6eef8;
+      min-height: 100vh;
+      display: flex;
+      height: 100vh;
+    }
 
-  /* Content area: use a two-column top area plus panels */
-  .content {padding:20px; overflow:auto; height:calc(100vh - 72px)}
-  .kpi-row{display:flex; gap:16px; margin-bottom:18px; flex-wrap:wrap}
-  .kpi{
-    flex:1; min-width:200px; background:var(--panel); color: #0b1220; padding:14px;border-radius:12px; box-shadow: var(--shadow);
-  }
-  [data-theme="dark"] .kpi{color:#e6eef8}
-  .kpi h4{margin:0;font-size:13px;color:var(--muted);font-weight:700}
-  .kpi .val{font-size:22px;font-weight:800;margin-top:6px}
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, #0f1724 0%, #0b1220 100%);
+      color: #e6eef8;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
 
-  .grid {
-    display:grid; grid-template-columns: 2fr 1fr; gap:16px;
-  }
+    .brand {
+      font-size: 20px;
+      font-weight: 700;
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
 
-  .panel{background:var(--panel); padding:14px; border-radius:12px; box-shadow: var(--shadow); color:inherit}
-  .panel h3{margin:0 0 8px 0}
-  .chart{width:100%; height:220px}
+    .brand .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+    }
 
-  /* Telemetry table */
-  .table{width:100%; border-collapse:collapse; font-size:13px}
-  .table thead th{ text-align:left; padding:10px 8px; background: linear-gradient(90deg, rgba(0,0,0,0.02), rgba(255,255,255,0.02)); font-weight:700}
-  .table td{padding:10px 8px; border-bottom:1px solid rgba(0,0,0,0.04)}
+    .nav {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
 
-  /* Database board (monday-like) */
-  .board{
-    display:flex; gap:12px; align-items:flex-start; overflow:auto; padding-bottom:12px;
-  }
-  .column{
-    min-width:280px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:10px; padding:12px; flex:0 0 280px; box-shadow: var(--shadow);
-  }
-  .column h4{margin:0 0 10px 0; font-size:14px; color:var(--muted)}
-  .card-db{
-    background:var(--panel); color:inherit; border-radius:8px; padding:10px; margin-bottom:10px; cursor:grab; box-shadow: 0 4px 10px rgba(2,6,23,0.06);
-  }
-  .card-db .title{font-weight:700; font-size:14px}
-  .card-db .meta{font-size:12px;color:var(--muted); margin-top:6px}
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-  /* Modal - login & card details */
-  .modal-backdrop{position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(2,6,23,0.6); z-index:50}
-  .modal{background:var(--panel); padding:18px; width:520px; border-radius:12px; box-shadow: var(--shadow)}
-  .modal h2{margin:0 0 12px 0}
-  .form-row{display:flex; gap:8px; margin-bottom:8px}
-  .input{flex:1;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06); background:transparent;color:inherit}
+    .nav button.active {
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+      box-shadow: inset 0 1px rgba(255, 255, 255, 0.02)
+    }
 
-  /* small utilities */
-  .muted{color:var(--muted)}
-  .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,0.04);font-weight:700}
-  .small{font-size:12px}
-  .right{display:flex;gap:8px; align-items:center}
+    .sidebar .meta {
+      margin-top: auto;
+      font-size: 13px;
+      color: var(--muted);
+    }
 
-  /* responsive tweaks */
-  @media (max-width:1000px){
-    .sidebar{display:none}
-    body{flex-direction:column}
-    .topbar{position:sticky; top:0; z-index:10}
-    .grid{grid-template-columns:1fr}
-  }
-</style>
+    /* Main content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0
+    }
+
+    .topbar {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 22px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+      box-shadow: var(--shadow);
+    }
+
+    .topbar .left {
+      display: flex;
+      gap: 18px;
+      align-items: center
+    }
+
+    .search {
+      width: 340px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      background: var(--glass);
+      color: #fff
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center
+    }
+
+    .btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 8px;
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer
+    }
+
+    /* Content area: use a two-column top area plus panels */
+    .content {
+      padding: 20px;
+      overflow: auto;
+      height: calc(100vh - 72px)
+    }
+
+    .kpi-row {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap
+    }
+
+    .kpi {
+      flex: 1;
+      min-width: 200px;
+      background: var(--panel);
+      color: #0b1220;
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    [data-theme="dark"] .kpi {
+      color: #e6eef8
+    }
+
+    .kpi h4 {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700
+    }
+
+    .kpi .val {
+      font-size: 22px;
+      font-weight: 800;
+      margin-top: 6px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+    }
+
+    .panel {
+      background: var(--panel);
+      padding: 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      color: inherit
+    }
+
+    .panel h3 {
+      margin: 0 0 8px 0
+    }
+
+    .chart {
+      width: 100%;
+      height: 220px
+    }
+
+    /* Telemetry table */
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px
+    }
+
+    .table thead th {
+      text-align: left;
+      padding: 10px 8px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.02), rgba(255, 255, 255, 0.02));
+      font-weight: 700
+    }
+
+    .table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04)
+    }
+
+    /* Database board (monday-like) */
+    .board {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      overflow: auto;
+      padding-bottom: 12px;
+    }
+
+    .column {
+      min-width: 280px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+      border-radius: 10px;
+      padding: 12px;
+      flex: 0 0 280px;
+      box-shadow: var(--shadow);
+    }
+
+    .column h4 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: var(--muted)
+    }
+
+    .card-db {
+      background: var(--panel);
+      color: inherit;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: grab;
+      box-shadow: 0 4px 10px rgba(2, 6, 23, 0.06);
+    }
+
+    .card-db .title {
+      font-weight: 700;
+      font-size: 14px
+    }
+
+    .card-db .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px
+    }
+
+    /* Modal - login & card details */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(2, 6, 23, 0.6);
+      z-index: 50
+    }
+
+    .modal {
+      background: var(--panel);
+      padding: 18px;
+      width: 520px;
+      border-radius: 12px;
+      box-shadow: var(--shadow)
+    }
+
+    .modal h2 {
+      margin: 0 0 12px 0
+    }
+
+    .form-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px
+    }
+
+    .input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      background: transparent;
+      color: inherit
+    }
+
+    /* small utilities */
+    .muted {
+      color: var(--muted)
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.04);
+      font-weight: 700
+    }
+
+    .small {
+      font-size: 12px
+    }
+
+    .right {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    /* responsive tweaks */
+    @media (max-width:1000px) {
+      .sidebar {
+        display: none
+      }
+
+      body {
+        flex-direction: column
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10
+      }
+
+      .grid {
+        grid-template-columns: 1fr
+      }
+    }
+  </style>
 </head>
+
 <body data-theme="dark">
 
-<!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="brand"><div class="logo">M</div>Micro</div>
-
-  <nav class="nav" id="mainNav">
-    <button class="active" data-view="overview">Overview</button>
-    <button data-view="telemetry">Telemetry</button>
-    <button data-view="motor">Motor Control</button>
-    <button data-view="diagnostics">Diagnostics</button>
-    <button data-view="databases">Databases</button>
-    <button data-view="tests">Tests</button>
-    <button data-view="settings">Settings</button>
-  </nav>
-
-  <div class="meta">
-
-    <div class="small muted">Session:</div>
-    <div style="margin-top:6px"><span id="sessionRole" class="chip">Viewer</span></div>
-
-    <div style="margin-top:12px" class="small muted">Nodes</div>
-    <div style="margin-top:6px"><div class="small">PICO-MTR-01 • ESP32-CMD-01</div></div>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="main">
-  <div class="topbar">
-    <div class="left">
-      <input id="globalSearch" class="search" placeholder="Search telemetry, logs, devices, configs..." />
-
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <div class="logo">M</div>Micro
     </div>
 
+    <nav class="nav" id="mainNav">
+      <button class="active" data-view="overview">Overview</button>
+      <button data-view="telemetry">Telemetry</button>
+      <button data-view="motor">Motor Control</button>
+      <button data-view="diagnostics">Diagnostics</button>
+      <button data-view="databases">Databases</button>
+      <button data-view="tests">Tests</button>
+      <button data-view="settings">Settings</button>
+    </nav>
 
-    <div class="controls">
-      <button id="themeToggle" class="icon-btn" title="Toggle Theme">Dark</button>
-      <button id="loginBtn" class="icon-btn">Sign In</button>
-      <button id="exportCsv" class="icon-btn">Export</button>
-      <button id="adminManagerBtn" class="icon-btn" style="display:none">Admin Manager</button>
-      <button id="createCard" class="btn" style="display:none">New Record</button>
+    <div class="meta">
+
+      <div class="small muted">Session:</div>
+      <div style="margin-top:6px"><span id="sessionRole" class="chip">Viewer</span></div>
+
+      <div style="margin-top:12px" class="small muted">Nodes</div>
+      <div style="margin-top:6px">
+        <div class="small">PICO-MTR-01 • ESP32-CMD-01</div>
+      </div>
     </div>
   </div>
 
-  <div class="content" id="contentArea">
-    <!-- dynamic content injected here -->
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="left">
+        <input id="globalSearch" class="search" placeholder="Search telemetry, logs, devices, configs..." />
+
+      </div>
+
+
+      <div class="controls">
+        <button id="themeToggle" class="icon-btn" title="Toggle Theme">Dark</button>
+        <button id="loginBtn" class="icon-btn">Sign In</button>
+        <button id="exportCsv" class="icon-btn">Export</button>
+        <button id="adminManagerBtn" class="icon-btn" style="display:none">Admin Manager</button>
+        <button id="createCard" class="btn" style="display:none">New Record</button>
+      </div>
+    </div>
+
+    <div class="content" id="contentArea">
+      <!-- dynamic content injected here -->
+    </div>
   </div>
-</div>
 
-<!-- Modal containers -->
-<div id="modalContainer" style="display:none"></div>
+  <!-- Modal containers -->
+  <div id="modalContainer" style="display:none"></div>
 
-<script>
-/* ============================
-   App state and sample data
-   ============================ */
-const appState = {
-  role: localStorage.getItem('micro_role') || null, // "Admin" | "Engineer" | "Viewer"
-  theme: localStorage.getItem('micro_theme') || 'dark',
-  telemetry: [],
-  logs: [],
-  dbColumns: [],
-  tests: [],
-  samplesLoaded: false
-};
-
-/* ------------ utilities -------------- */
-function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
-function nowTime(){ return new Date().toLocaleTimeString(); }
-function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
-
-/* set theme */
-function applyTheme(t){ document.body.setAttribute('data-theme', t); localStorage.setItem('micro_theme', t); document.getElementById('themeToggle').innerText = t==='dark' ? 'Dark' : 'Light' }
-
-/* set role UI */
-function setRole(r){
-  appState.role = r;
-  localStorage.setItem('micro_role', r);
-  document.getElementById('sessionRole').innerText = r || 'Viewer';
-  // show admin features
-  document.getElementById('createCard').style.display = (r==='Admin' || r==='Engineer') ? 'inline-block' : 'none';
-}
-
-/* ============= sample data loader ============== */
-function loadSampleData(){
-  if(appState.samplesLoaded) return;
-  // telemetry: generate 150 entries with CRC, latency, packet size, node, message
-  const messages = ["Heartbeat OK","Status","Duty update","Telemetry packet","Watchdog reset","CRC OK","CRC FAIL"];
-  for(let i=0;i<150;i++){
-    const node = (i%3===0) ? 'ESP32' : 'Pico';
-    const msg = messages[rand(0,messages.length-1)];
-    const pkt = {
-      ts: new Date(Date.now() - (150-i)*1000).toLocaleString(),
-      node,
-      msg,
-      size: `${rand(28,176)}B`,
-      crc: '0x' + Math.floor(Math.random()*0xFFFF).toString(16).toUpperCase(),
-      latency_ms: (Math.random()*6).toFixed(2),
-      signal: `${rand(70,100)}%`
+  <script>
+    /* ============================
+       App state and sample data
+       ============================ */
+    const appState = {
+      role: localStorage.getItem('micro_role') || null, // "Admin" | "Engineer" | "Viewer"
+      theme: localStorage.getItem('micro_theme') || 'dark',
+      telemetry: [],
+      logs: [],
+      dbColumns: [],
+      tests: [],
+      samplesLoaded: false
     };
-    appState.telemetry.push(pkt);
-  }
 
-  // logs
-  const logTypes = ['EVENT','SECURITY','DIAG','OPS','TEST'];
-  for(let i=0;i<120;i++){
-    appState.logs.push({
-      id: uid('log'),
-      ts: new Date(Date.now() - rand(60,3600)*1000).toISOString(),
-      severity: (i%10===0)?'ERROR':'INFO',
-      source: (i%2===0)?'Pico':'ESP32',
-      message: ['Motor enabled','Duty set to 75%','PID tuning applied','UART sync established'][rand(0,3)]
-    });
-  }
+    /* ------------ utilities -------------- */
+    function uid(prefix = 'id') {return prefix + '_' + Math.random().toString(36).slice(2, 9);}
+    function nowTime() {return new Date().toLocaleTimeString();}
+    function rand(min, max) {return Math.floor(Math.random() * (max - min + 1)) + min;}
 
-  // DB columns (monday-like) - columns: Backlog, In Progress, Review, Done
-  const sampleRecords = [];
-  for(let i=0;i<28;i++){
-    sampleRecords.push({
-      id: uid('rec'),
-      title: ['Calibrate PID','Firmware Bump','Telemetry Audit','Motor Stress Test','Security Audit'][rand(0,4)],
-      owner: ['eng.alex','eng.maya','ops.sam','admin.kim'][rand(0,3)],
-      priority: ['P1','P2','P3'][rand(0,2)],
-      created: new Date(Date.now() - rand(1,10)*86400000).toLocaleDateString(),
-      lastUpdate: new Date(Date.now() - rand(0,4)*86400000).toLocaleDateString(),
-      notes: 'Comprehensive log and analysis attached. See test artifacts.'
-    });
-  }
-  // assign to columns
-  appState.dbColumns = [
-    {id:uid('col'),name:'Backlog',items: sampleRecords.slice(0,8)},
-    {id:uid('col'),name:'In Progress',items: sampleRecords.slice(8,15)},
-    {id:uid('col'),name:'Review',items: sampleRecords.slice(15,22)},
-    {id:uid('col'),name:'Done',items: sampleRecords.slice(22)}
-  ];
+    /* set theme */
+    function applyTheme(t) {document.body.setAttribute('data-theme', t); localStorage.setItem('micro_theme', t); document.getElementById('themeToggle').innerText = t === 'dark' ? 'Dark' : 'Light'}
 
-  // tests
-  appState.tests = [
-    {id:'T-001', name:'Motor PWM Response', status:'PASS', runtime:'2m 30s', params:'±2% tolerance, 1000 samples'},
-    {id:'T-002', name:'UART Sync', status:'PASS', runtime:'45s', params:'Latency < 5ms, jitter <0.5ms'},
-    {id:'T-003', name:'Telemetry Integrity', status:'PASS', runtime:'3m 10s', params:'CRC validated, loss 0.2%'},
-    {id:'T-004', name:'Watchdog Trigger', status:'PASS', runtime:'20s', params:'Reset < 120ms'}
-  ];
+    /* set role UI */
+    function setRole(r) {
+      appState.role = r;
+      localStorage.setItem('micro_role', r);
+      document.getElementById('sessionRole').innerText = r || 'Viewer';
+      // show admin features
+      document.getElementById('createCard').style.display = (r === 'Admin' || r === 'Engineer') ? 'inline-block' : 'none';
+    }
 
-  appState.samplesLoaded = true;  
+    /* ============= sample data loader ============== */
+    function loadSampleData() {
+      if (appState.samplesLoaded) return;
+      // telemetry: generate 150 entries with CRC, latency, packet size, node, message
+      const messages = ["Heartbeat OK", "Status", "Duty update", "Telemetry packet", "Watchdog reset", "CRC OK", "CRC FAIL"];
+      for (let i = 0; i < 150; i++) {
+        const node = (i % 3 === 0) ? 'ESP32' : 'Pico';
+        const msg = messages[rand(0, messages.length - 1)];
+        const pkt = {
+          ts: new Date(Date.now() - (150 - i) * 1000).toLocaleString(),
+          node,
+          msg,
+          size: `${rand(28, 176)}B`,
+          crc: '0x' + Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase(),
+          latency_ms: (Math.random() * 6).toFixed(2),
+          signal: `${rand(70, 100)}%`
+        };
+        appState.telemetry.push(pkt);
+      }
+
+      // logs
+      const logTypes = ['EVENT', 'SECURITY', 'DIAG', 'OPS', 'TEST'];
+      for (let i = 0; i < 120; i++) {
+        appState.logs.push({
+          id: uid('log'),
+          ts: new Date(Date.now() - rand(60, 3600) * 1000).toISOString(),
+          severity: (i % 10 === 0) ? 'ERROR' : 'INFO',
+          source: (i % 2 === 0) ? 'Pico' : 'ESP32',
+          message: ['Motor enabled', 'Duty set to 75%', 'PID tuning applied', 'UART sync established'][rand(0, 3)]
+        });
+      }
+
+      // DB columns (monday-like) - columns: Backlog, In Progress, Review, Done
+      const sampleRecords = [];
+      for (let i = 0; i < 28; i++) {
+        sampleRecords.push({
+          id: uid('rec'),
+          title: ['Calibrate PID', 'Firmware Bump', 'Telemetry Audit', 'Motor Stress Test', 'Security Audit'][rand(0, 4)],
+          owner: ['eng.alex', 'eng.maya', 'ops.sam', 'admin.kim'][rand(0, 3)],
+          priority: ['P1', 'P2', 'P3'][rand(0, 2)],
+          created: new Date(Date.now() - rand(1, 10) * 86400000).toLocaleDateString(),
+          lastUpdate: new Date(Date.now() - rand(0, 4) * 86400000).toLocaleDateString(),
+          notes: 'Comprehensive log and analysis attached. See test artifacts.'
+        });
+      }
+      // assign to columns
+      appState.dbColumns = [
+        {id: uid('col'), name: 'Backlog', items: sampleRecords.slice(0, 8)},
+        {id: uid('col'), name: 'In Progress', items: sampleRecords.slice(8, 15)},
+        {id: uid('col'), name: 'Review', items: sampleRecords.slice(15, 22)},
+        {id: uid('col'), name: 'Done', items: sampleRecords.slice(22)}
+      ];
+
+      // tests
+      appState.tests = [
+        {id: 'T-001', name: 'Motor PWM Response', status: 'PASS', runtime: '2m 30s', params: '±2% tolerance, 1000 samples'},
+        {id: 'T-002', name: 'UART Sync', status: 'PASS', runtime: '45s', params: 'Latency < 5ms, jitter <0.5ms'},
+        {id: 'T-003', name: 'Telemetry Integrity', status: 'PASS', runtime: '3m 10s', params: 'CRC validated, loss 0.2%'},
+        {id: 'T-004', name: 'Watchdog Trigger', status: 'PASS', runtime: '20s', params: 'Reset < 120ms'}
+      ];
+
+      appState.samplesLoaded = true;
+
+    }
 
 
-/* ================== Renderers ==================== */
-const content = document.getElementById('contentArea');
+      /* ================== Renderers ==================== */
+      const content = document.getElementById('contentArea');
 
-function renderOverview(){
-  loadSampleData();
-  content.innerHTML = `
+      function renderOverview() {
+        loadSampleData();
+        content.innerHTML = `
     <div class="kpi-row">
       <div class="kpi">
         <h4>Cluster Uptime</h4>
@@ -293,7 +549,7 @@ function renderOverview(){
       </div>
       <div class="kpi">
         <h4>Average Latency</h4>
-        <div class="val">${(Math.random()*5+2).toFixed(2)} ms</div>
+        <div class="val">${(Math.random() * 5 + 2).toFixed(2)} ms</div>
         <div class="muted small">Median across last 1,000 packets</div>
       </div>
       <div class="kpi">
@@ -364,29 +620,31 @@ function renderOverview(){
     </div>
   `;
 
-  // Charts
-  const PicoChart = new Chart(document.getElementById('chartPico'), {
-    type:'line',
-    data: {
-      labels:Array.from({length:18},(_,i)=>`${i}m`),
-      datasets:[ { label:'RAM %', data:Array.from({length:18},()=>rand(20,45)), borderColor:'#60a5fa', tension:0.4, fill:true, backgroundColor:'rgba(96,165,250,0.08)'} ,
-                 { label:'CPU %', data:Array.from({length:18},()=>rand(30,60)), borderColor:'#34d399', tension:0.4, fill:false }]
-    },
-    options:{scales:{y:{min:0,max:100}}}
-  });
+        // Charts
+        const PicoChart = new Chart(document.getElementById('chartPico'), {
+          type: 'line',
+          data: {
+            labels: Array.from({length: 18}, (_, i) => `${i}m`),
+            datasets: [{label: 'RAM %', data: Array.from({length: 18}, () => rand(20, 45)), borderColor: '#60a5fa', tension: 0.4, fill: true, backgroundColor: 'rgba(96,165,250,0.08)'},
+            {label: 'CPU %', data: Array.from({length: 18}, () => rand(30, 60)), borderColor: '#34d399', tension: 0.4, fill: false}]
+          },
+          options: {scales: {y: {min: 0, max: 100}}}
+        });
 
-  const EspChart = new Chart(document.getElementById('chartEsp'), {
-    type:'line',
-    data:{ labels:Array.from({length:18},(_,i)=>`${i}m`),
-      datasets:[ { label:'RAM %', data:Array.from({length:18},()=>rand(30,60)), borderColor:'#06b6d4', tension:0.4, fill:true, backgroundColor:'rgba(6,182,212,0.06)'} ,
-                 { label:'Throughput kbps', data:Array.from({length:18},()=>rand(800,1400)), borderColor:'#f97316', tension:0.4, fill:false, yAxisID:'b'} ] },
-    options:{scales:{y:{min:0,max:100}, b:{position:'right',min:0,max:2000}}}
-  });
-}
+        const EspChart = new Chart(document.getElementById('chartEsp'), {
+          type: 'line',
+          data: {
+            labels: Array.from({length: 18}, (_, i) => `${i}m`),
+            datasets: [{label: 'RAM %', data: Array.from({length: 18}, () => rand(30, 60)), borderColor: '#06b6d4', tension: 0.4, fill: true, backgroundColor: 'rgba(6,182,212,0.06)'},
+            {label: 'Throughput kbps', data: Array.from({length: 18}, () => rand(800, 1400)), borderColor: '#f97316', tension: 0.4, fill: false, yAxisID: 'b'}]
+          },
+          options: {scales: {y: {min: 0, max: 100}, b: {position: 'right', min: 0, max: 2000}}}
+        });
+      }
 
-function renderTelemetry(){
-  loadSampleData();
-  content.innerHTML = `
+      function renderTelemetry() {
+        loadSampleData();
+        content.innerHTML = `
     <div class="panel">
       <h3>Telemetry Stream</h3>
       <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
@@ -401,33 +659,33 @@ function renderTelemetry(){
     </div>
   `;
 
-  const tbody = document.querySelector('#telemTable tbody');
-  function refresh(filter=''){
-    tbody.innerHTML = '';
-    const rows = appState.telemetry.filter(r => {
+        const tbody = document.querySelector('#telemTable tbody');
+        function refresh(filter = '') {
+          tbody.innerHTML = '';
+          const rows = appState.telemetry.filter(r => {
 
-      if(!filter) return true;
+            if (!filter) return true;
 
-      const s = (r.node + ' ' + r.msg + ' ' + r.crc).toLowerCase();
-      return s.includes(filter.toLowerCase());
-    });
-    rows.slice().reverse().forEach(r=>{
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.ts}</td><td>${r.node}</td><td>${r.msg}</td><td>${r.size}</td><td>${r.crc}</td><td>${r.latency_ms} ms</td><td>${r.signal}</td>`;
-      tbody.appendChild(tr);
-    });
-  }
-  refresh();
+            const s = (r.node + ' ' + r.msg + ' ' + r.crc).toLowerCase();
+            return s.includes(filter.toLowerCase());
+          });
+          rows.slice().reverse().forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${r.ts}</td><td>${r.node}</td><td>${r.msg}</td><td>${r.size}</td><td>${r.crc}</td><td>${r.latency_ms} ms</td><td>${r.signal}</td>`;
+            tbody.appendChild(tr);
+          });
+        }
+        refresh();
 
-  document.getElementById('telemFilter').addEventListener('input', (e)=>refresh(e.target.value));
-  document.getElementById('clearTelem').addEventListener('click', ()=>{
-    appState.telemetry = []; refresh();
-  });
-}
+        document.getElementById('telemFilter').addEventListener('input', (e) => refresh(e.target.value));
+        document.getElementById('clearTelem').addEventListener('click', () => {
+          appState.telemetry = []; refresh();
+        });
+      }
 
-function renderMotor(){
-  loadSampleData();
-  content.innerHTML = `
+      function renderMotor() {
+        loadSampleData();
+        content.innerHTML = `
     <div class="panel">
       <h3>Motor Control & Telemetry</h3>
       <div style="display:flex;gap:12px;align-items:center">
@@ -467,19 +725,21 @@ function renderMotor(){
     </div>
   `;
 
-  const motorChart = new Chart(document.getElementById('motorChart'), {
-    type:'line',
-    data:{ labels:Array.from({length:20},(_,i)=>i+'s'), datasets:[
-      {label:'Target RPM', data:Array.from({length:20},()=>1500), borderColor:'#60a5fa', tension:0.3, fill:false},
-      {label:'Actual RPM', data:Array.from({length:20},()=>1480 + rand(-30,20)), borderColor:'#34d399', tension:0.3, fill:false}
-    ]},
-    options:{scales:{y:{min:1200,max:1700}}}
-  });
-}
+        const motorChart = new Chart(document.getElementById('motorChart'), {
+          type: 'line',
+          data: {
+            labels: Array.from({length: 20}, (_, i) => i + 's'), datasets: [
+              {label: 'Target RPM', data: Array.from({length: 20}, () => 1500), borderColor: '#60a5fa', tension: 0.3, fill: false},
+              {label: 'Actual RPM', data: Array.from({length: 20}, () => 1480 + rand(-30, 20)), borderColor: '#34d399', tension: 0.3, fill: false}
+            ]
+          },
+          options: {scales: {y: {min: 1200, max: 1700}}}
+        });
+      }
 
-function renderDiagnostics(){
-  loadSampleData();
-  content.innerHTML = `
+      function renderDiagnostics() {
+        loadSampleData();
+        content.innerHTML = `
     <div class="panel">
       <h3>Diagnostics Console</h3>
       <table class="table">
@@ -501,19 +761,20 @@ function renderDiagnostics(){
     </div>
   `;
 
-  new Chart(document.getElementById('memChart'), {
-    type:'line',
-    data:{ labels:Array.from({length:18},(_,i)=>i+'m'),
-      datasets:[ {label:'Heap Free (KB)', data:Array.from({length:18},()=>rand(18,36)), borderColor:'#f97316', fill:true, backgroundColor:'rgba(249,115,22,0.06)'}]
-    },
-    options:{scales:{y:{min:0,max:100}}}
-  });
-}
+        new Chart(document.getElementById('memChart'), {
+          type: 'line',
+          data: {
+            labels: Array.from({length: 18}, (_, i) => i + 'm'),
+            datasets: [{label: 'Heap Free (KB)', data: Array.from({length: 18}, () => rand(18, 36)), borderColor: '#f97316', fill: true, backgroundColor: 'rgba(249,115,22,0.06)'}]
+          },
+          options: {scales: {y: {min: 0, max: 100}}}
+        });
+      }
 
-function renderDatabases(){
-  loadSampleData();
-  // Build columns markup (monday-like)
-  content.innerHTML = `
+      function renderDatabases() {
+        loadSampleData();
+        // Build columns markup (monday-like)
+        content.innerHTML = `
     <div class="panel">
       <h3>Databases — Project Board</h3>
 
@@ -531,7 +792,7 @@ function renderDatabases(){
       <table class="table">
         <thead><tr><th>Query</th><th>Result</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td>Open Items</td><td>${appState.dbColumns.reduce((s,c)=>s+c.items.length,0)}</td><td>Across all columns</td></tr>
+          <tr><td>Open Items</td><td>${appState.dbColumns.reduce((s, c) => s + c.items.length, 0)}</td><td>Across all columns</td></tr>
           <tr><td>Avg Cycle Time</td><td>4.2 days</td><td>Based on last 90 samples</td></tr>
           <tr><td>Top Contributor</td><td>eng.maya</td><td>Most assignments completed</td></tr>
         </tbody>
@@ -539,68 +800,68 @@ function renderDatabases(){
     </div>
   `;
 
-  function renderBoard(filterText=''){
-    const board = document.getElementById('boardArea');
-    board.innerHTML = '';
-    appState.dbColumns.forEach(col=>{
-      const colEl = document.createElement('div');
-      colEl.className = 'column';
-      colEl.setAttribute('data-col', col.id);
-      colEl.innerHTML = `<h4>${col.name} <span class="muted small">(${col.items.length})</span></h4>`;
-      const container = document.createElement('div');
-      col.items.forEach(item=>{
-        if(filterText && !(item.title.toLowerCase().includes(filterText.toLowerCase()) || item.owner.toLowerCase().includes(filterText.toLowerCase()) )) return;
-        const card = document.createElement('div');
-        card.className='card-db';
-        card.setAttribute('draggable','true');
-        card.setAttribute('data-id', item.id);
-        card.innerHTML = `<div class="title">${item.title}</div><div class="meta small muted">Owner: ${item.owner} • ${item.priority} • Updated ${item.lastUpdate}</div>`;
-        card.addEventListener('click', ()=>openRecordDetail(item));
-        // drag handlers
-        card.addEventListener('dragstart', (e)=>{ e.dataTransfer.setData('text/plain', JSON.stringify({id:item.id,from:col.id})); });
-        container.appendChild(card);
-      });
-      colEl.appendChild(container);
+        function renderBoard(filterText = '') {
+          const board = document.getElementById('boardArea');
+          board.innerHTML = '';
+          appState.dbColumns.forEach(col => {
+            const colEl = document.createElement('div');
+            colEl.className = 'column';
+            colEl.setAttribute('data-col', col.id);
+            colEl.innerHTML = `<h4>${col.name} <span class="muted small">(${col.items.length})</span></h4>`;
+            const container = document.createElement('div');
+            col.items.forEach(item => {
+              if (filterText && !(item.title.toLowerCase().includes(filterText.toLowerCase()) || item.owner.toLowerCase().includes(filterText.toLowerCase()))) return;
+              const card = document.createElement('div');
+              card.className = 'card-db';
+              card.setAttribute('draggable', 'true');
+              card.setAttribute('data-id', item.id);
+              card.innerHTML = `<div class="title">${item.title}</div><div class="meta small muted">Owner: ${item.owner} • ${item.priority} • Updated ${item.lastUpdate}</div>`;
+              card.addEventListener('click', () => openRecordDetail(item));
+              // drag handlers
+              card.addEventListener('dragstart', (e) => {e.dataTransfer.setData('text/plain', JSON.stringify({id: item.id, from: col.id}));});
+              container.appendChild(card);
+            });
+            colEl.appendChild(container);
 
-      // allow drop
-      colEl.addEventListener('dragover', (e)=>{ e.preventDefault(); colEl.style.outline='2px dashed rgba(255,255,255,0.06)'; });
-      colEl.addEventListener('dragleave', ()=>{ colEl.style.outline='none';});
-      colEl.addEventListener('drop', (e)=>{
-        e.preventDefault(); colEl.style.outline='none';
-        try{
-          const payload = JSON.parse(e.dataTransfer.getData('text/plain'));
-          const {id, from} = payload;
-          if(from === col.id) return;
-          // find and move item
-          let moved = null;
-          appState.dbColumns.forEach(c=>{
-            const idx = c.items.findIndex(it=>it.id===id);
-            if(idx>-1){ moved = c.items.splice(idx,1)[0]; }
+            // allow drop
+            colEl.addEventListener('dragover', (e) => {e.preventDefault(); colEl.style.outline = '2px dashed rgba(255,255,255,0.06)';});
+            colEl.addEventListener('dragleave', () => {colEl.style.outline = 'none';});
+            colEl.addEventListener('drop', (e) => {
+              e.preventDefault(); colEl.style.outline = 'none';
+              try {
+                const payload = JSON.parse(e.dataTransfer.getData('text/plain'));
+                const {id, from} = payload;
+                if (from === col.id) return;
+                // find and move item
+                let moved = null;
+                appState.dbColumns.forEach(c => {
+                  const idx = c.items.findIndex(it => it.id === id);
+                  if (idx > -1) {moved = c.items.splice(idx, 1)[0];}
+                });
+                if (moved) {
+                  const toCol = appState.dbColumns.find(c => c.id === col.id);
+                  toCol.items.unshift(moved);
+                  renderBoard(document.getElementById('dbSearch').value);
+                }
+              } catch (err) {console.error(err);}
+            });
+
+            board.appendChild(colEl);
           });
-          if(moved) {
-            const toCol = appState.dbColumns.find(c=>c.id===col.id);
-            toCol.items.unshift(moved);
-            renderBoard(document.getElementById('dbSearch').value);
-          }
-        }catch(err){ console.error(err); }
-      });
+        }
 
-      board.appendChild(colEl);
-    });
-  }
+        renderBoard();
+        document.getElementById('dbSearch').addEventListener('input', (e) => renderBoard(e.target.value));
+        document.getElementById('addRecordBtn').addEventListener('click', () => openNewRecord());
+        document.getElementById('exportBoard').addEventListener('click', () => exportBoardCSV());
+      }
 
-  renderBoard();
-  document.getElementById('dbSearch').addEventListener('input', (e)=>renderBoard(e.target.value));
-  document.getElementById('addRecordBtn').addEventListener('click', ()=>openNewRecord());
-  document.getElementById('exportBoard').addEventListener('click', ()=>exportBoardCSV());
-}
-
-function renderTests(){
-  loadSampleData();
-  content.innerHTML = `
+      function renderTests() {
+        loadSampleData();
+        content.innerHTML = `
     <div class="panel"><h3>Automated Test Suite</h3>
       <table class="table"><thead><tr><th>Test ID</th><th>Name</th><th>Status</th><th>Runtime</th><th>Parameters</th></tr></thead>
-        <tbody id="testTable">${appState.tests.map(t=>`<tr><td>${t.id}</td><td>${t.name}</td><td>${t.status}</td><td>${t.runtime}</td><td>${t.params}</td></tr>`).join('')}</tbody>
+        <tbody id="testTable">${appState.tests.map(t => `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.status}</td><td>${t.runtime}</td><td>${t.params}</td></tr>`).join('')}</tbody>
       </table>
     </div>
 
@@ -609,10 +870,10 @@ function renderTests(){
       <p class="muted">Artifacts are retained for 90 days. Full logs and CSVs are exportable for offline analysis. The suite supports regression, stress, and integration tests covering comms, motor control, and safety paths.</p>
     </div>
   `;
-}
+      }
 
-function renderSettings(){
-  content.innerHTML = `
+      function renderSettings() {
+        content.innerHTML = `
     <div class="panel">
       <h3>System Settings</h3>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -643,23 +904,23 @@ function renderSettings(){
     </div>
   `;
 
-  document.getElementById('applySettings').addEventListener('click', ()=>{
-    alert('Settings applied and persisted');
+        document.getElementById('applySettings').addEventListener('click', () => {
+          alert('Settings applied and persisted');
 
-    // basic local persistence
+          // basic local persistence
 
-    const cfg = {kp:document.getElementById('kp').value, ki:document.getElementById('ki').value, kd:document.getElementById('kd').value, baud:document.getElementById('baud').value, hb:document.getElementById('hb').value};
-    localStorage.setItem('micro_config', JSON.stringify(cfg));
-  });
-  document.getElementById('reloadDefaults').addEventListener('click', ()=>{
-    localStorage.removeItem('micro_config'); alert('Defaults reloaded');
-  });
-}
+          const cfg = {kp: document.getElementById('kp').value, ki: document.getElementById('ki').value, kd: document.getElementById('kd').value, baud: document.getElementById('baud').value, hb: document.getElementById('hb').value};
+          localStorage.setItem('micro_config', JSON.stringify(cfg));
+        });
+        document.getElementById('reloadDefaults').addEventListener('click', () => {
+          localStorage.removeItem('micro_config'); alert('Defaults reloaded');
+        });
+      }
 
-/* =================== Database card utilities & modal =================== */
-function openRecordDetail(item){
-  const modal = document.createElement('div'); modal.className='modal-backdrop';
-  modal.innerHTML = `<div class="modal">
+      /* =================== Database card utilities & modal =================== */
+      function openRecordDetail(item) {
+        const modal = document.createElement('div'); modal.className = 'modal-backdrop';
+        modal.innerHTML = `<div class="modal">
     <h2>Record: ${item.title}</h2>
     <div class="form-row"><div style="flex:1"><label class="small muted">Owner</label><input class="input" id="detailOwner" value="${item.owner}"/></div>
     <div style="width:120px"><label class="small muted">Priority</label><input class="input" id="detailPriority" value="${item.priority}"/></div></div>
@@ -669,22 +930,22 @@ function openRecordDetail(item){
       <button class="btn" id="saveRec">Save</button>
     </div>
   </div>`;
-  document.getElementById('modalContainer').appendChild(modal);
-  document.getElementById('modalContainer').style.display='block';
-  modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
-  modal.querySelector('#saveRec').addEventListener('click', ()=>{
-    item.owner = document.getElementById('detailOwner').value;
-    item.priority = document.getElementById('detailPriority').value;
-    item.notes = document.getElementById('detailNotes').value;
-    modal.remove(); document.getElementById('modalContainer').style.display='none';
-    // re-render board if visible
-    if(document.querySelector('.sidebar button.active').dataset.view === 'databases') renderDatabases();
-  });
-}
+        document.getElementById('modalContainer').appendChild(modal);
+        document.getElementById('modalContainer').style.display = 'block';
+        modal.querySelector('.icon-btn').addEventListener('click', () => {modal.remove(); document.getElementById('modalContainer').style.display = 'none';});
+        modal.querySelector('#saveRec').addEventListener('click', () => {
+          item.owner = document.getElementById('detailOwner').value;
+          item.priority = document.getElementById('detailPriority').value;
+          item.notes = document.getElementById('detailNotes').value;
+          modal.remove(); document.getElementById('modalContainer').style.display = 'none';
+          // re-render board if visible
+          if (document.querySelector('.sidebar button.active').dataset.view === 'databases') renderDatabases();
+        });
+      }
 
-function openNewRecord(){
-  const modal = document.createElement('div'); modal.className='modal-backdrop';
-  modal.innerHTML = `<div class="modal">
+      function openNewRecord() {
+        const modal = document.createElement('div'); modal.className = 'modal-backdrop';
+        modal.innerHTML = `<div class="modal">
     <h2>New Record</h2>
     <div class="form-row"><input class="input" id="newTitle" placeholder="Title" /></div>
     <div class="form-row"><input class="input" id="newOwner" placeholder="Owner (e.g. eng.alex)" /><input class="input" id="newPriority" placeholder="Priority (P1/P2)" /></div>
@@ -695,45 +956,45 @@ function openNewRecord(){
       <button class="btn" id="createRecBtn">Create</button>
     </div>
   </div>`;
-  document.getElementById('modalContainer').appendChild(modal);
-  document.getElementById('modalContainer').style.display='block';
-  modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
+        document.getElementById('modalContainer').appendChild(modal);
+        document.getElementById('modalContainer').style.display = 'block';
+        modal.querySelector('.icon-btn').addEventListener('click', () => {modal.remove(); document.getElementById('modalContainer').style.display = 'none';});
 
-  modal.querySelector('#createRecBtn').addEventListener('click', ()=>{
-    const rec = {id: uid('rec'), title: document.getElementById('newTitle').value || 'New Task', owner: document.getElementById('newOwner').value||'ops.unknown', priority: document.getElementById('newPriority').value||'P3', created: new Date().toLocaleDateString(), lastUpdate: new Date().toLocaleDateString(), notes: document.getElementById('newNotes').value};
-    console.log("Tests Passed successfully");
-    console.log("Starting to execute AP Tests")
+        modal.querySelector('#createRecBtn').addEventListener('click', () => {
+          const rec = {id: uid('rec'), title: document.getElementById('newTitle').value || 'New Task', owner: document.getElementById('newOwner').value || 'ops.unknown', priority: document.getElementById('newPriority').value || 'P3', created: new Date().toLocaleDateString(), lastUpdate: new Date().toLocaleDateString(), notes: document.getElementById('newNotes').value};
+          console.log("Tests Passed successfully");
+          console.log("Starting to execute AP Tests")
 
 
-    // TODO: Implement validation Admin Progress and Engineer role handling with a successful ID Manager
-    //TODO: Implement a role called Founder that manages the permissions of admin and decides admins and gets to control a few extra features
+          // TODO: Implement validation Admin Progress and Engineer role handling with a successful ID Manager
+          //TODO: Implement a role called Founder that manages the permissions of admin and decides admins and gets to control a few extra features
 
-    appState.dbColumns[0].items = Array.isArray(appState.dbColumns[0].items) ? appState.dbColumns[0].items : []; //ensure array
-    appState.dbColumns[0].items.unshift(rec); // add to Backlog
-    modal.remove(); document.getElementById('modalContainer').style.display='none';
-    if(document.querySelector('.sidebar button.active').dataset.view === 'databases') renderDatabases();
-  });
-}
+          appState.dbColumns[0].items = Array.isArray(appState.dbColumns[0].items) ? appState.dbColumns[0].items : []; //ensure array
+          appState.dbColumns[0].items.unshift(rec); // add to Backlog
+          modal.remove(); document.getElementById('modalContainer').style.display = 'none';
+          if (document.querySelector('.sidebar button.active').dataset.view === 'databases') renderDatabases();
+        });
+      }
 
-/* ================== CSV Export for board ================ */
-function exportBoardCSV(){
-  const rows = [['id','title','owner','priority','created','lastUpdate','notes','column']];
-  appState.dbColumns.forEach(col=>{
-    col.items.forEach(it=>{
-      rows.push([it.id, it.title, it.owner, it.priority, it.created, it.lastUpdate, it.notes, col.name]);
-    });
-  });
-  const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='micro_board_export.csv'; a.click(); URL.revokeObjectURL(url);
+      /* ================== CSV Export for board ================ */
+      function exportBoardCSV() {
+        const rows = [['id', 'title', 'owner', 'priority', 'created', 'lastUpdate', 'notes', 'column']];
+        appState.dbColumns.forEach(col => {
+          col.items.forEach(it => {
+            rows.push([it.id, it.title, it.owner, it.priority, it.created, it.lastUpdate, it.notes, col.name]);
+          });
+        });
+        const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], {type: 'text/csv'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'micro_board_export.csv'; a.click(); URL.revokeObjectURL(url);
 
-}
+      }
 
-/* ==================== Auth / Login modal ================== */
-function showLogin(){
-  const modal = document.createElement('div'); modal.className='modal-backdrop';
-  modal.innerHTML = `<div class="modal">
+      /* ==================== Auth / Login modal ================== */
+      function showLogin() {
+        const modal = document.createElement('div'); modal.className = 'modal-backdrop';
+        modal.innerHTML = `<div class="modal">
     <h2>Sign In</h2>
     <div class="form-row"><input class="input" id="userName" placeholder="username" /></div>
     <div class="form-row">
@@ -749,43 +1010,43 @@ function showLogin(){
       <button class="btn" id="signInBtn">Sign In</button>
     </div>
   </div>`;
-  document.getElementById('modalContainer').appendChild(modal);
-  document.getElementById('modalContainer').style.display='block';
-  modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
-  modal.querySelector('#signInBtn').addEventListener('click', ()=>{
-    const role = document.getElementById('roleSelect').value;
-    const username = (document.getElementById('userName').value || '').trim() || ('user_' + Math.floor(Math.random()*9000+1000));
-    // persist user to simple user store
-    upsertUser(username, role);
-    setRole(role);
-    // set the current user name in UI for clarity
-    document.getElementById('sessionRole').innerText = role || 'Viewer';
-    // optionally update login button label to user
-    document.getElementById('loginBtn').innerText = username;
-    modal.remove(); document.getElementById('modalContainer').style.display='none';
-    // immediate re-render to reflect permissions
-    routeToCurrent();
-  });
-}
+        document.getElementById('modalContainer').appendChild(modal);
+        document.getElementById('modalContainer').style.display = 'block';
+        modal.querySelector('.icon-btn').addEventListener('click', () => {modal.remove(); document.getElementById('modalContainer').style.display = 'none';});
+        modal.querySelector('#signInBtn').addEventListener('click', () => {
+          const role = document.getElementById('roleSelect').value;
+          const username = (document.getElementById('userName').value || '').trim() || ('user_' + Math.floor(Math.random() * 9000 + 1000));
+          // persist user to simple user store
+          upsertUser(username, role);
+          setRole(role);
+          // set the current user name in UI for clarity
+          document.getElementById('sessionRole').innerText = role || 'Viewer';
+          // optionally update login button label to user
+          document.getElementById('loginBtn').innerText = username;
+          modal.remove(); document.getElementById('modalContainer').style.display = 'none';
+          // immediate re-render to reflect permissions
+          routeToCurrent();
+        });
+      }
 
-/* ================ Simple user store & Admin Manager (Founder) ================ */
-function loadUsers(){
-  try{ return JSON.parse(localStorage.getItem('micro_users')||'[]'); }catch(e){ return []; }
-}
-function saveUsers(list){ localStorage.setItem('micro_users', JSON.stringify(list||[])); }
-function upsertUser(username, role){
-  const users = loadUsers();
-  const idx = users.findIndex(u=>u.username === username);
-  if(idx > -1) users[idx].role = role;
-  else users.push({username, role});
-  saveUsers(users);
-  appState.currentUser = username;
-}
+      /* ================ Simple user store & Admin Manager (Founder) ================ */
+      function loadUsers() {
+        try {return JSON.parse(localStorage.getItem('micro_users') || '[]');} catch (e) {return [];}
+      }
+      function saveUsers(list) {localStorage.setItem('micro_users', JSON.stringify(list || []));}
+      function upsertUser(username, role) {
+        const users = loadUsers();
+        const idx = users.findIndex(u => u.username === username);
+        if (idx > -1) users[idx].role = role;
+        else users.push({username, role});
+        saveUsers(users);
+        appState.currentUser = username;
+      }
 
-function showAdminManager(){
-  const users = loadUsers();
-  const modal = document.createElement('div'); modal.className='modal-backdrop';
-  modal.innerHTML = `<div class="modal">
+      function showAdminManager() {
+        const users = loadUsers();
+        const modal = document.createElement('div'); modal.className = 'modal-backdrop';
+        modal.innerHTML = `<div class="modal">
     <h2>Admin Manager</h2>
     <div id="adminList" style="max-height:320px;overflow:auto;margin-top:8px"></div>
     <div style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px">
@@ -793,94 +1054,94 @@ function showAdminManager(){
       <button class="btn" id="adminSave">Save</button>
     </div>
   </div>`;
-  document.getElementById('modalContainer').appendChild(modal);
-  document.getElementById('modalContainer').style.display='block';
+        document.getElementById('modalContainer').appendChild(modal);
+        document.getElementById('modalContainer').style.display = 'block';
 
-  const listEl = modal.querySelector('#adminList');
-  if(users.length === 0) listEl.innerHTML = '<div class="muted small">No known users yet. Users are added when they sign in.</div>';
-  else{
-    listEl.innerHTML = users.map(u=>`<div style="display:flex;gap:8px;align-items:center;padding:6px;border-bottom:1px solid rgba(0,0,0,0.04)"><div style="flex:1">${u.username}</div><select data-user="${u.username}" style="width:160px"><option>Viewer</option><option>Engineer</option><option>Admin</option><option>Founder</option></select></div>`).join('');
+        const listEl = modal.querySelector('#adminList');
+        if (users.length === 0) listEl.innerHTML = '<div class="muted small">No known users yet. Users are added when they sign in.</div>';
+        else {
+          listEl.innerHTML = users.map(u => `<div style="display:flex;gap:8px;align-items:center;padding:6px;border-bottom:1px solid rgba(0,0,0,0.04)"><div style="flex:1">${u.username}</div><select data-user="${u.username}" style="width:160px"><option>Viewer</option><option>Engineer</option><option>Admin</option><option>Founder</option></select></div>`).join('');
 
-    // set current selections
-    users.forEach(u=>{ const sel = listEl.querySelector(`select[data-user="${u.username}"]`); if(sel) sel.value = u.role; });
-  }
+          // set current selections
+          users.forEach(u => {const sel = listEl.querySelector(`select[data-user="${u.username}"]`); if (sel) sel.value = u.role;});
+        }
 
-  modal.querySelector('.icon-btn').addEventListener('click', ()=>{ modal.remove(); document.getElementById('modalContainer').style.display='none'; });
-  modal.querySelector('#adminSave').addEventListener('click', ()=>{
-    const selects = listEl.querySelectorAll('select[data-user]');
-    const updated = [];
-    selects.forEach(s=>{ updated.push({username: s.getAttribute('data-user'), role: s.value}); });
-    saveUsers(updated);
-    // if current user role changed, reflect it
-    const cur = appState.currentUser;
-    if(cur){ const me = updated.find(u=>u.username===cur); if(me) setRole(me.role); }
-    modal.remove(); document.getElementById('modalContainer').style.display='none';
-    alert('User roles updated');
-  });
-}
+        modal.querySelector('.icon-btn').addEventListener('click', () => {modal.remove(); document.getElementById('modalContainer').style.display = 'none';});
+        modal.querySelector('#adminSave').addEventListener('click', () => {
+          const selects = listEl.querySelectorAll('select[data-user]');
+          const updated = [];
+          selects.forEach(s => {updated.push({username: s.getAttribute('data-user'), role: s.value});});
+          saveUsers(updated);
+          // if current user role changed, reflect it
+          const cur = appState.currentUser;
+          if (cur) {const me = updated.find(u => u.username === cur); if (me) setRole(me.role);}
+          modal.remove(); document.getElementById('modalContainer').style.display = 'none';
+          alert('User roles updated');
+        });
+      }
 
-/* ================ Navigation & boot =============== */
-const navButtons = document.querySelectorAll('.nav button');
-navButtons.forEach(b => b.addEventListener('click', (e)=>{
-  navButtons.forEach(x=>x.classList.remove('active'));
-  b.classList.add('active');
-  route(b.dataset.view);
-}));
+      /* ================ Navigation & boot =============== */
+      const navButtons = document.querySelectorAll('.nav button');
+      navButtons.forEach(b => b.addEventListener('click', (e) => {
+        navButtons.forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        route(b.dataset.view);
+      }));
 
-function route(viewName){
-  if(viewName === 'overview') renderOverview();
-  else if(viewName === 'telemetry') renderTelemetry();
-  else if(viewName === 'motor') renderMotor();
-  else if(viewName === 'diagnostics') renderDiagnostics();
-  else if(viewName === 'databases') renderDatabases();
-  else if(viewName === 'tests') renderTests();
-  else if(viewName === 'settings'){
-    if(appState.role === 'Viewer'){ alert('Insufficient privileges: Viewer role is read-only'); }
-    renderSettings();
-  } else renderOverview();
-}
+      function route(viewName) {
+        if (viewName === 'overview') renderOverview();
+        else if (viewName === 'telemetry') renderTelemetry();
+        else if (viewName === 'motor') renderMotor();
+        else if (viewName === 'diagnostics') renderDiagnostics();
+        else if (viewName === 'databases') renderDatabases();
+        else if (viewName === 'tests') renderTests();
+        else if (viewName === 'settings') {
+          if (appState.role === 'Viewer') {alert('Insufficient privileges: Viewer role is read-only');}
+          renderSettings();
+        } else renderOverview();
+      }
 
-function routeToCurrent(){
-  const act = document.querySelector('.nav button.active');
-  if(act) route(act.dataset.view);
-  else route('overview');
-}
+      function routeToCurrent() {
+        const act = document.querySelector('.nav button.active');
+        if (act) route(act.dataset.view);
+        else route('overview');
+      }
 
-/* =============== Init & event hookups =============== */
-document.getElementById('themeToggle').addEventListener('click', ()=>{
-  const current = document.body.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  
-  applyTheme(next);
-});
-applyTheme(appState.theme);
+      /* =============== Init & event hookups =============== */
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
 
-// login / export / create
-document.getElementById('loginBtn').addEventListener('click', showLogin);
-document.getElementById('exportCsv').addEventListener('click', exportBoardCSV);
-document.getElementById('createCard').addEventListener('click', openNewRecord);
+        applyTheme(next);
+      });
+      applyTheme(appState.theme);
 
-// search box quick nav
-document.getElementById('globalSearch').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter') {
-    const v = e.target.value.trim().toLowerCase();
-    if(!v) return;
-    // quick heuristics: if contains 'telemetry' go to telemetry
-    if(v.includes('telemetry')||v.includes('packet')) document.querySelector('.nav button[data-view="telemetry"]').click();
-    else if(v.includes('motor')||v.includes('rpm')) document.querySelector('.nav button[data-view="motor"]').click();
-    else document.querySelector('.nav button[data-view="databases"]').click();
-  }
-});
+      // login / export / create
+      document.getElementById('loginBtn').addEventListener('click', showLogin);
+      document.getElementById('exportCsv').addEventListener('click', exportBoardCSV);
+      document.getElementById('createCard').addEventListener('click', openNewRecord);
 
-// init samples & default role
-loadSampleData();
-setRole(appState.role || 'Viewer');
-routeToCurrent();
+      // search box quick nav
+      document.getElementById('globalSearch').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const v = e.target.value.trim().toLowerCase();
+          if (!v) return;
+          // quick heuristics: if contains 'telemetry' go to telemetry
+          if (v.includes('telemetry') || v.includes('packet')) document.querySelector('.nav button[data-view="telemetry"]').click();
+          else if (v.includes('motor') || v.includes('rpm')) document.querySelector('.nav button[data-view="motor"]').click();
+          else document.querySelector('.nav button[data-view="databases"]').click();
+        }
+      });
 
-/* On load, reveal create button if permitted */
-document.getElementById('createCard').style.display = (appState.role==='Admin' || appState.role==='Engineer') ? 'inline-block' : 'none';
+      // init samples & default role
+      loadSampleData();
+      setRole(appState.role || 'Viewer');
+      routeToCurrent();
 
-</script>
+      /* On load, reveal create button if permitted */
+      document.getElementById('createCard').style.display = (appState.role === 'Admin' || appState.role === 'Engineer') ? 'inline-block' : 'none';
+
+  </script>
 
 </body>
 
